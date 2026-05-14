@@ -10,5 +10,6 @@ export  class UserProfile {
         this.totalDistance=data.statistics.totalDistance;
         this.totalSessions=data.statistics.totalSessions;
         this.totalDuration=data.statistics.totalDuration;
+        this.weeklyGoal = data.weeklyGoal || data.goal || data.userInfos?.goal || 0
     }
 }

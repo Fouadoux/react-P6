@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
-import {mockUserProfile} from "../mock/mockUserProfile.js";
+import {UserProfile} from "../models/UserProfile.js";
+import {getUserProfile} from "../service/profileServiceMock.js";
 
 export default function useUserProfile() {
     const [data, setData] = useState(null)
@@ -11,11 +12,11 @@ export default function useUserProfile() {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await mockUserProfile;
+                const data = await getUserProfile();
                 if (!data) {
                     throw Error('User Profile not found');
                 }
-                setData(data)
+                setData(new UserProfile(data));
             } catch (err) {
                 if (err.name !== "AbortError") {
                     setError(err.message);

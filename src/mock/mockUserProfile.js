@@ -1,5 +1,6 @@
 export const mockUserProfile =
     {
+        weeklyGoal: 2,
         profile :{
             firstName: "Sophie",  lastName:"Martin",
             createdAt: "2025-01-01",  age: 32, height:165,weight: 60,

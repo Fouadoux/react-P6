@@ -1,8 +1,8 @@
 export const activityByMonth = (data, yearMonth) => {
-    const filterByMonth = data.filter(activity => activity.date.startsWith(yearMonth))
+    const filterByMonth = data.filter(activity => activity.date.toISOString().startsWith(yearMonth))
 
     const tab = filterByMonth.reduce((acc, cur) => {
-        const day = new Date(cur.date).getDate()
+        const day = cur.date.getDate()
         const week = Math.ceil(day / 7)
         acc[`S${week}`] += cur.distance
         return acc

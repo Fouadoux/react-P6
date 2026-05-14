@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
-import {mockUserActivity} from "../mock/mockUserActivity.js";
+import {UserActivity} from "../models/UserActivity.js";
+import {getUserActivity} from "../service/profileServiceMock.js";
 
 export default function useUserActivity(){
     const [data, setData] = useState(null);
@@ -11,11 +12,11 @@ export default function useUserActivity(){
             try{
                 setLoading(true);
                 setError(null);
-                const data= await mockUserActivity;
-                setData(data);
+                const data= await getUserActivity();
                 if(!data){
                     throw Error('Activity Profile not found');
                 }
+                setData(data.map(session => new UserActivity(session)))
             }catch (err){
                 if (err.name !== "AbortError") {
                     setError(err.message);
