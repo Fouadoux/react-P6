@@ -1,28 +1,40 @@
-import { useState } from "react"
-import { activityByWeek } from "../../../../utils/activityByWeek.js"
+import {useMemo, useState} from "react"
 import {
     ComposedChart, Bar, Line, XAxis, YAxis,
     CartesianGrid, ResponsiveContainer,
 } from 'recharts'
+import useUserActivity from "../../../../hooks/useUserActivity.js";
 
 const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 
-export default function ComposedChartByWeek({ data }) {
+export default function ComposedChartByWeek() {
 
     const now = new Date()
     const day = now.getDay()
     const monday = new Date(now)
     monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
 
+
     const [currentWeek, setCurrentWeek] = useState(monday)
     const [lineHovered, setLineHovered] = useState(false)
 
-    const dataByDay = activityByWeek(data, currentWeek)
+    //const dataByDay = activityByWeek(data, currentWeek)
+    const endOfWeek = useMemo(() => {
+        const date = new Date(currentWeek)
+        date.setDate(date.getDate() + 6)
+        return date
+    }, [currentWeek])
 
-    const chartData = dataByDay.map((entry, i) => ({
+    const { data: dataByDay, loading, error } = useUserActivity(currentWeek, endOfWeek)
+
+    if (error) return <p>Erreur : {error}</p>
+
+
+
+    const  chartData = dataByDay ?  dataByDay.map((entry, i) => ({
         ...entry,
         dayLabel: DAY_LABELS[i] ?? entry.week,
-    }))
+    })) : []
 
     const changeWeek = (offset) => {
         const date = new Date(currentWeek)
@@ -30,9 +42,9 @@ export default function ComposedChartByWeek({ data }) {
         setCurrentWeek(date)
     }
 
-    const avgHeartRate = dataByDay.length
+    const avgHeartRate = dataByDay ? dataByDay.length
         ? Math.round(dataByDay.reduce((sum, w) => sum + w.average, 0) / dataByDay.length)
-        : 0
+        : 0 : []
 
     const firstDay = new Date(currentWeek)
     const lastDay = new Date(currentWeek)
@@ -68,6 +80,10 @@ export default function ComposedChartByWeek({ data }) {
             </div>
 
             {/* Chart */}
+            {loading || !dataByDay ?
+                <div className="flex items-center justify-center w-full h-[300px]">
+                    <div className="w-10 h-10 border-4 border-[#901C1C] border-t-transparent rounded-full animate-spin" />
+                </div> :
             <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={chartData}>
                     <CartesianGrid vertical={false} stroke="#F1F1F1" strokeDasharray="4 4" />
@@ -85,8 +101,11 @@ export default function ComposedChartByWeek({ data }) {
                         tick={{ fill: "#707070", fontSize: 10, fontFamily: "Inter" }}
                         width={18}
                     />
+
+
                     <Bar dataKey="min" fill="#FCC1B6" radius={[6, 6, 0, 0]} barSize={14} name="min" />
                     <Bar dataKey="max" fill="#F4320B" radius={[6, 6, 0, 0]} barSize={14} name="max" />
+
                     <Line
                         type="monotone"
                         dataKey="average"
@@ -100,6 +119,7 @@ export default function ComposedChartByWeek({ data }) {
                     />
                 </ComposedChart>
             </ResponsiveContainer>
+            }
 
             {/* Legend */}
             <div className="flex items-center gap-4 pt-2">

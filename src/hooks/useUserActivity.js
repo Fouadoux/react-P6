@@ -1,18 +1,20 @@
 import {useEffect, useState} from "react";
 import {UserActivity} from "../models/UserActivity.js";
-import {getUserActivity} from "../service/profileServiceMock.js";
+import {getUserActivity} from "../service/profileService.js";
+import useAuth from "./useAuth.js";
 
-export default function useUserActivity(){
+export default function useUserActivity(startDate, endDate) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { token } = useAuth()
 
     useEffect(() => {
         async function loadData() {
             try{
                 setLoading(true);
                 setError(null);
-                const data= await getUserActivity();
+                const data= await getUserActivity(token,startDate, endDate);
                 if(!data){
                     throw Error('Activity Profile not found');
                 }
@@ -26,6 +28,6 @@ export default function useUserActivity(){
             }
         }
         loadData();
-    },[])
+    },[token,startDate, endDate])
     return {data,loading,error}
 }

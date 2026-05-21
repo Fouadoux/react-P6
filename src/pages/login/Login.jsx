@@ -13,6 +13,7 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        console.log("submit login",username, password)
         try {
             const token = await loginApi(username, password)
             login(token)
@@ -46,9 +47,9 @@ export default function Login() {
                     {/* Champs */}
                     <div className="flex flex-col gap-[20px] mb-[32px]">
                         <div className="flex flex-col gap-[8px]">
-                            <label className="text-[14px] text-[#707070]">Adresse email</label>
+                            <label className="text-[14px] text-[#707070]">Username</label>
                             <input
-                                type="email"
+                                type="text"
                                 required
                                 value={username ?? ""}
                                 onChange={e => setUsername(e.target.value)}
