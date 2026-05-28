@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {createUserProfile} from "../models/UserProfile.js";
-import {getUserProfile} from "../service/profileService.js";
+import {getUserProfile} from "../service/service.js";
 import useAuth from "./useAuth.js";
 
 export default function useUserProfile() {

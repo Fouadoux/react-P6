@@ -1,4 +1,3 @@
-import useUserActivity from "../../hooks/useUserActivity.js";
 import useUserProfile from "../../hooks/useUserProfile.js";
 import UserCard from "./component/UserCard.jsx";
 import BarChartByMonth from "./component/BarChartByMonth.jsx";

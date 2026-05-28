@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {createUserActivity} from "../models/UserActivity.js";
-import {getUserActivity} from "../service/profileService.js";
+import {getUserActivity} from "../service/service.js";
 import useAuth from "./useAuth.js";
 
 export default function useUserActivity(startDate, endDate) {
@@ -16,7 +16,6 @@ export default function useUserActivity(startDate, endDate) {
                 setLoading(true);
                 setError(null);
                 const data= await getUserActivity(token,startDate, endDate);
-
                 if(!data){
                     throw Error('Activity Profile not found');
                 }

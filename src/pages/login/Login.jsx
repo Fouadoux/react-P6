@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {loginApi} from "../../api/auth.js";
+import {loginApi} from "../../service/service.js";
 import useAuth from "../../hooks/useAuth.js";
 import {useNavigate} from "react-router-dom";
 
@@ -13,7 +13,6 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log("submit login",username, password)
         try {
             const token = await loginApi(username, password)
             login(token)
