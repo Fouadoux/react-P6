@@ -1,11 +1,11 @@
-export class UserActivity {
-    constructor(data) {
-        this.date= new Date(data.date);
-        this.distance=data.distance;
-        this.duration=data.duration;
-        this.min = data.heartRate?.min
-        this.max = data.heartRate?.max
-        this.average = data.heartRate?.average
-        this.caloriesBurned=data.caloriesBurned;
+export function createUserActivity(data) {
+    return {
+        date: new Date(data.date),
+        distance: data.distance,
+        duration: data.duration,
+        min: data.heartRate?.min,
+        max: data.heartRate?.max,
+        average: data.heartRate?.average,
+        caloriesBurned: data.caloriesBurned,
     }
 }

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {UserProfile} from "../models/UserProfile.js";
+import {createUserProfile} from "../models/UserProfile.js";
 import {getUserProfile} from "../service/profileService.js";
 import useAuth from "./useAuth.js";
 
@@ -18,7 +18,7 @@ export default function useUserProfile() {
                 if (!data) {
                     throw Error('User Profile not found');
                 }
-                setData(new UserProfile(data));
+                setData(createUserProfile(data));
             } catch (err) {
                 if (err.name !== "AbortError") {
                     setError(err.message);

@@ -1,12 +1,29 @@
-import {useState} from "react";
-import {activityByMonth} from "../../../../utils/activityByMonth.js";
+import {useMemo, useState} from "react";
+import {activityByMonth} from "../../../utils/activityByMonth.js";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
+import useUserActivity from "../../../hooks/useUserActivity.js";
 
-export default function BarChartByMonth({data}){
+export default function BarChartByMonth(){
     const now = new Date()
     const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     const [currentMonth, setCurrentMonth] = useState(yearMonth)
-    const dataByMonth = activityByMonth(data, currentMonth)
+
+
+    const startOfMonth = useMemo(() => {
+        const [year, month] = currentMonth.split("-")
+        return new Date(year, month - 1, 1)
+    }, [currentMonth])
+
+    const endOfMonth = useMemo(() => {
+        const [year, month] = currentMonth.split("-")
+        return new Date(year, month, 0)
+    }, [currentMonth])
+
+    const { data: data, loading, error } = useUserActivity(startOfMonth, endOfMonth)
+    if (error) return <p>Erreur : {error}</p>
+
+    const dataByMonth = data ? activityByMonth(data,currentMonth) : []
+
 
     const changeMonth = (offset) => {
         const date = new Date(currentMonth + "-01")
@@ -40,13 +57,17 @@ export default function BarChartByMonth({data}){
                     <div className="flex gap-1.5">
                         <button
                             onClick={() => changeMonth(-1)}
-                            className="w-6 h-6 border border-[#717171] rounded-[10px] bg-white cursor-pointer flex justify-center text-sm text-gray-600 hover:bg-gray-50"
-                        >‹</button>
+                        >
+                            <img src="/left.svg" alt="suivant" className="w-6 h-6" />
+                        </button>
                         <span className="flex items-center text-[12px] text-[#111111]">{periodLabel}</span>
                         <button
                             onClick={() => changeMonth(1)}
-                            className="w-6 h-6 border border-[#717171] rounded-[10px] bg-white cursor-pointer flex justify-center text-sm text-gray-600 hover:bg-gray-50"
-                        >›</button>
+                            disabled={currentMonth === yearMonth}
+                            className={currentMonth === yearMonth ? "opacity-30" : ""}
+                        >
+                            <img src="/rigth.svg" alt="suivant" className="w-6 h-6" />
+                        </button>
                     </div>
                 </div>
                 <p className="text-[12px] text-[#707070] mt-1 m-0">
@@ -59,6 +80,10 @@ export default function BarChartByMonth({data}){
 
 
             {/* Chart */}
+            {loading || !dataByMonth ?
+                <div className="flex items-center justify-center w-full h-[300px]">
+                    <div className="w-10 h-10 border-4 border-[#901C1C] border-t-transparent rounded-full animate-spin" />
+                </div> :
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={dataByMonth} barSize={40} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <CartesianGrid
@@ -73,16 +98,17 @@ export default function BarChartByMonth({data}){
                         tick={{ fill: "#707070", fontSize: 12, fontFamily: "Inter" }}
                     />
                     <YAxis
-                        domain={[0, 'auto']}
-                        ticks={[0, 10, 20, 30, 'auto']}
+                        domain={[0, 30]}
+                        ticks={[0, 10, 20, 30]}
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: "#707070", fontSize: 10, fontFamily: "Inter" }}
                         width={16}
                     />
-                    <Bar dataKey="distance" fill="#B6BDFC" radius={[6, 6, 0, 0]} barSize={14} />
+                    <Bar dataKey="distance" fill="#B6BDFC" radius={[6, 6, 6, 6]} barSize={14} />
                 </BarChart>
             </ResponsiveContainer>
+            }
 
             {/* Légende */}
             <div className="flex items-center gap-1 pt-3">

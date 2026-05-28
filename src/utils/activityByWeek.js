@@ -1,31 +1,28 @@
     const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
 
-    export const activityByWeek = (data, monday) => {
-        const start = new Date(monday)
-        const sunday = new Date(start)
-        sunday.setDate(sunday.getDate() + 6)
+    export const activityByWeek   = (data, startWeek, endWeek) => {
 
+
+        const start = new Date(startWeek)
+        const end = new Date(endWeek)
         start.setHours(0, 0, 0, 0)
-        sunday.setHours(23, 0, 0, 0)
-        // Filtrer les sessions de la semaine
-        const filtered = data.filter(activity => {
-            return activity.date >= start && activity.date <= sunday
-        })
+        end.setHours(23, 0, 0, 0)
+
 
         // Construire un tableau de 7 jours
         return days.map((day, index) => {
             const currentDay = new Date(start)
-            currentDay.setDate(currentDay.getDate() + index)
+            currentDay.setDate(start.getDate() + index)
 
-            const session = filtered.find(activity =>
+            const session = data.find(activity =>
                 activity.date.toDateString() === currentDay.toDateString()
             )
 
             return {
-                day,
-                min: session?.min ?? 0,
-                max: session?.max ?? 0,
-                average: session?.average ?? 0,
+                dayLabel: day,
+                min: session?.min ?? 130,
+                max: session?.max ?? 130,
+                average: session?.average ?? 130,
                 distance: session?.distance ?? 0,
                 duration: session?.duration ?? 0,
             }

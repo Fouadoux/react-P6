@@ -1,10 +1,10 @@
 import {mockUserProfile} from "../mock/mockUserProfile.js";
 import {mockUserActivity} from "../mock/mockUserActivity.js";
 
-export const getUserProfile = (token) => {
+export const getUserProfile = () => {
     return mockUserProfile
 }
 
-export const getUserActivity = (token) => {
+export const getUserActivity = () => {
     return mockUserActivity
 }

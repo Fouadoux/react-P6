@@ -1,15 +1,16 @@
-export  class UserProfile {
-    constructor(data) {
-        this.firstName = data.profile.firstName;
-        this.lastName = data.profile.lastName;
-        this.createdAt= new Date(data.profile.createdAt);
-        this.age=data.profile.age;
-        this.weight=data.profile.weight;
-        this.height=data.profile.height;
-        this.profilePicture=data.profile.profilePicture;
-        this.totalDistance=data.statistics.totalDistance;
-        this.totalSessions=data.statistics.totalSessions;
-        this.totalDuration=data.statistics.totalDuration;
-        this.weeklyGoal = data.weeklyGoal || data.goal || data.userInfos?.goal || 0
+export function createUserProfile(data) {
+    return {
+        firstName: data.profile.firstName,
+        lastName: data.profile.lastName,
+        createdAt: new Date(data.profile.createdAt),
+        age: data.profile.age,
+        gender: data.profile.gender,
+        weight: data.profile.weight,
+        height: data.profile.height,
+        profilePicture: data.profile.profilePicture,
+        totalDistance: data.statistics.totalDistance,
+        totalSessions: data.statistics.totalSessions,
+        totalDuration: data.statistics.totalDuration,
+        weeklyGoal: data.profile.weeklyGoal || 0,
     }
 }

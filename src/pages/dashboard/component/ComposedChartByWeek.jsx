@@ -3,9 +3,8 @@ import {
     ComposedChart, Bar, Line, XAxis, YAxis,
     CartesianGrid, ResponsiveContainer,
 } from 'recharts'
-import useUserActivity from "../../../../hooks/useUserActivity.js";
-
-const DAY_LABELS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+import useUserActivity from "../../../hooks/useUserActivity.js";
+import {activityByWeek} from "../../../utils/activityByWeek.js";
 
 export default function ComposedChartByWeek() {
 
@@ -13,12 +12,9 @@ export default function ComposedChartByWeek() {
     const day = now.getDay()
     const monday = new Date(now)
     monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
-
-
     const [currentWeek, setCurrentWeek] = useState(monday)
     const [lineHovered, setLineHovered] = useState(false)
 
-    //const dataByDay = activityByWeek(data, currentWeek)
     const endOfWeek = useMemo(() => {
         const date = new Date(currentWeek)
         date.setDate(date.getDate() + 6)
@@ -26,15 +22,9 @@ export default function ComposedChartByWeek() {
     }, [currentWeek])
 
     const { data: dataByDay, loading, error } = useUserActivity(currentWeek, endOfWeek)
-
     if (error) return <p>Erreur : {error}</p>
 
-
-
-    const  chartData = dataByDay ?  dataByDay.map((entry, i) => ({
-        ...entry,
-        dayLabel: DAY_LABELS[i] ?? entry.week,
-    })) : []
+    const chartData = dataByDay ? activityByWeek(dataByDay, currentWeek, endOfWeek) : []
 
     const changeWeek = (offset) => {
         const date = new Date(currentWeek)
@@ -65,13 +55,17 @@ export default function ComposedChartByWeek() {
                     <div className="flex gap-1.5">
                         <button
                             onClick={() => changeWeek(-1)}
-                            className=" w-6 h-6 border border-[#717171] rounded-[10px] bg-white cursor-pointer flex justify-center text-sm text-gray-600 hover:bg-gray-50"
-                        >‹</button>
+                        >
+                            <img src="/left.svg" alt="suivant" className="w-6 h-6" />
+                            </button>
                         <span className="flex items-center text-[12px] text-[#111111]">{periodLabel}</span>
                         <button
                             onClick={() => changeWeek(1)}
-                            className="w-6 h-6 border border-[#717171] rounded-[10px] bg-white cursor-pointer flex justify-center text-sm text-gray-600 hover:bg-gray-50"
-                        >›</button>
+                            disabled={currentWeek.toDateString() === monday.toDateString()}
+                            className={currentWeek.toDateString() === monday.toDateString() ? "opacity-30" : ""}
+                        >
+                            <img src="/rigth.svg" alt="suivant" className="w-6 h-6" />
+                        </button>
                     </div>
                 </div>
                     <p className="text-[12px] text-[#707070] mt-1 m-0">
@@ -95,6 +89,7 @@ export default function ComposedChartByWeek() {
                     />
                     <YAxis
                         domain={[130, 187]}
+                        allowDataOverflow={true}
                         ticks={[130, 145, 160,187]}
                         axisLine={false}
                         tickLine={false}
@@ -103,8 +98,8 @@ export default function ComposedChartByWeek() {
                     />
 
 
-                    <Bar dataKey="min" fill="#FCC1B6" radius={[6, 6, 0, 0]} barSize={14} name="min" />
-                    <Bar dataKey="max" fill="#F4320B" radius={[6, 6, 0, 0]} barSize={14} name="max" />
+                    <Bar dataKey="min" fill="#FCC1B6" radius={[6, 6, 6, 6]} barSize={14} name="min" />
+                    <Bar dataKey="max" fill="#F4320B" radius={[6, 6, 6, 6]} barSize={14} name="max" />
 
                     <Line
                         type="monotone"

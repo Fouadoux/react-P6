@@ -1,12 +1,22 @@
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
+import { useContext } from "react"
+import {AuthContext} from "../context/AuthContext.jsx";
 
 export default function Header() {
+    const { logout } = useContext(AuthContext)
+    const navigate = useNavigate()
+
+    const handleLogout = () => {
+        logout()
+        navigate("/")
+    }
+
     return (
         <header className="flex items-center justify-between px-13 pt-9 w-285 m-auto">
 
-            <img src="/Logo.png" alt="SportSee"  />
+            <img src="/Logo.svg" alt="SportSee" />
 
-            <nav className="flex items-center gap-10 w-115.25 px-12 rounded-2xl bg-white">
+            <nav className="flex items-center gap-10 w-115.25 px-12 rounded-2xl bg-white whitespace-nowrap">
                 <NavLink
                     to="/dashboard"
                     className={({ isActive }) =>
@@ -16,7 +26,7 @@ export default function Header() {
                     Dashboard
                 </NavLink>
                 <NavLink
-                    to="/profil"
+                    to="/profile"
                     className={({ isActive }) =>
                         `text-[14px] no-underline ${isActive ? "text-[#0B23F4]" : "text-[#111111] hover:text-[#0B23F4]"}`
                     }
@@ -26,12 +36,12 @@ export default function Header() {
 
                 <div className="w-px h-[40px] bg-[#707070]" />
 
-                <NavLink
-                    to="/logout"
-                    className="text-[14px] text-[#0B23F4] no-underline hover:underline"
+                <button
+                    onClick={handleLogout}
+                    className="text-[14px] text-[#0B23F4] bg-transparent border-none cursor-pointer hover:underline p-0"
                 >
                     Se déconnecter
-                </NavLink>
+                </button>
             </nav>
         </header>
     )

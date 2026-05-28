@@ -1,22 +1,19 @@
 import useUserActivity from "../../hooks/useUserActivity.js";
 import useUserProfile from "../../hooks/useUserProfile.js";
-import UserCard from "./composant/UserCard/UserCard.jsx";
-import BarChartByMonth from "./composant/BarChart/BarChartByMonth.jsx";
-import ComposedChartByWeek from "./composant/ComposedChart/ComposedChartByWeek.jsx";
-import RadialChartWeek from "./composant/RadialChart/RadialChartWeek.jsx";
-import Header from "../../component/Header/Header.jsx";
+import UserCard from "./component/UserCard.jsx";
+import BarChartByMonth from "./component/BarChartByMonth.jsx";
+import ComposedChartByWeek from "./component/ComposedChartByWeek.jsx";
+import RadialChartWeek from "./component/RadialChartWeek.jsx";
+import Header from "../../component/Header.jsx";
+import Footer from "../../component/Footer.jsx";
 
 export default function Dashboard() {
 
-    const {data: dataActivity, loading: loadingActivity, error: errorActivity} = useUserActivity();
     const {data: dataProfile, loading: loadingProfile, error: errorProfile} = useUserProfile();
-    if (loadingActivity || loadingProfile) return <p>Chargement...</p>
-    console.log(errorProfile)
-    console.log(errorActivity)
-    if (errorActivity || errorProfile) return <p>Une erreur est survenue</p>
-    if (!dataActivity) return null;
+    if (loadingProfile) return <p>Chargement...</p>
+    if (errorProfile) return <p>Une erreur est survenue</p>
     if (!dataProfile) return null;
-
+    console.log("goal =>", dataProfile);
 
 
     return (
@@ -29,12 +26,13 @@ export default function Dashboard() {
             <div className="flex flex-col gap-y-8">
                 <h2 className="text-xl font-bold mb-1">Vos dernières performances</h2>
                 <div className="flex flex-row gap-x-6">
-            <BarChartByMonth data={dataActivity} />
-            <ComposedChartByWeek data={dataActivity} />
+            <BarChartByMonth />
+            <ComposedChartByWeek />
                 </div>
             </div>
-        <RadialChartWeek data={dataActivity} goal={dataProfile.weeklyGoal} />
+        <RadialChartWeek goal={dataProfile.weeklyGoal} />
         </div>
+        <Footer />
     </div>
 </>
 )
