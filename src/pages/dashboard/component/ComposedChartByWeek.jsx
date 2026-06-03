@@ -3,33 +3,44 @@ import {
     ComposedChart, Bar, Line, XAxis, YAxis,
     CartesianGrid, ResponsiveContainer,
 } from 'recharts'
-import useUserActivity from "../../../hooks/useUserActivity.js";
+import {getUserActivity} from "../../../service/service.js";
 import {activityByWeek} from "../../../utils/activityByWeek.js";
+import useAuth from "../../../hooks/useAuth.js";
+import {createUserActivity} from "../../../models/UserActivity.js";
+import {getEndOfWeek, getMonday, getWeekWithOffset} from "../../../utils/dateUtils.js";
+import NotFound from "../../notFound/NotFound.jsx";
 
-export default function ComposedChartByWeek() {
+export default function ComposedChartByWeek({data}) {
 
-    const now = new Date()
-    const day = now.getDay()
-    const monday = new Date(now)
-    monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
-    const [currentWeek, setCurrentWeek] = useState(monday)
+    const {token} = useAuth()
+
+    const [currentWeek, setCurrentWeek] = useState(getMonday())
     const [lineHovered, setLineHovered] = useState(false)
+    const [dataByDay, setDataByDay] = useState(data)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
 
     const endOfWeek = useMemo(() => {
-        const date = new Date(currentWeek)
-        date.setDate(date.getDate() + 6)
-        return date
+        return getEndOfWeek(currentWeek)
     }, [currentWeek])
 
-    const { data: dataByDay, loading, error } = useUserActivity(currentWeek, endOfWeek)
-    if (error) return <p>Erreur : {error}</p>
+    if (error) return <NotFound />
 
     const chartData = dataByDay ? activityByWeek(dataByDay, currentWeek, endOfWeek) : []
 
-    const changeWeek = (offset) => {
-        const date = new Date(currentWeek)
-        date.setDate(date.getDate() + offset * 7)
+    const changeWeek = async (offset) => {
+        const date = getWeekWithOffset(currentWeek, offset)
+        const newEndOfWeek = getEndOfWeek(date)
         setCurrentWeek(date)
+        setLoading(true)
+        try {
+            const newData = await getUserActivity(token, date, newEndOfWeek)
+            setDataByDay(newData.map(session => createUserActivity(session)))
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const avgHeartRate = dataByDay ? dataByDay.length
@@ -61,8 +72,8 @@ export default function ComposedChartByWeek() {
                         <span className="flex items-center text-[12px] text-[#111111]">{periodLabel}</span>
                         <button
                             onClick={() => changeWeek(1)}
-                            disabled={currentWeek.toDateString() === monday.toDateString()}
-                            className={currentWeek.toDateString() === monday.toDateString() ? "opacity-30" : ""}
+                            disabled={currentWeek.toDateString() === getMonday().toDateString()}
+                            className={currentWeek.toDateString() === getMonday().toDateString() ? "opacity-30" : ""}
                         >
                             <img src="/rigth.svg" alt="suivant" className="w-6 h-6" />
                         </button>

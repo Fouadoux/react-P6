@@ -5,15 +5,29 @@ import ComposedChartByWeek from "./component/ComposedChartByWeek.jsx";
 import RadialChartWeek from "./component/RadialChartWeek.jsx";
 import Header from "../../component/Header.jsx";
 import Footer from "../../component/Footer.jsx";
+import DashboardSkeleton from "./component/DashboardSkeleton.jsx";
+import useUserActivity from "../../hooks/useUserActivity.js";
+import {useMemo} from "react";
+import {getEndOfWeek, getMonday} from "../../utils/dateUtils.js";
+import NotFound from "../notFound/NotFound.jsx";
 
 export default function Dashboard() {
 
-    const {data: dataProfile, loading: loadingProfile, error: errorProfile} = useUserProfile();
-    if (loadingProfile) return <p>Chargement...</p>
-    if (errorProfile) return <p>Une erreur est survenue</p>
-    if (!dataProfile) return null;
-    console.log("goal =>", dataProfile);
 
+    
+    const currentWeek = useMemo(() => {
+        return getMonday()
+    }, [])
+    
+    const endOfWeek = useMemo(() => {
+        return getEndOfWeek(currentWeek)
+    }, [currentWeek])
+
+    const {data: dataProfile, loading: loadingProfile, error: errorProfile} = useUserProfile();
+    const {data: dataActivity, loading: loadingActivity, error: errorActivity} = useUserActivity(currentWeek, endOfWeek);
+    if (loadingProfile || loadingActivity ) return <DashboardSkeleton />
+    if (errorProfile || errorActivity) return <NotFound />
+    if (!dataProfile || !dataActivity) return null;
 
     return (
 <>
@@ -26,10 +40,10 @@ export default function Dashboard() {
                 <h2 className="text-xl font-bold mb-1">Vos dernières performances</h2>
                 <div className="flex flex-row gap-x-6">
             <BarChartByMonth />
-            <ComposedChartByWeek />
+            <ComposedChartByWeek data={dataActivity} />
                 </div>
             </div>
-        <RadialChartWeek goal={dataProfile.weeklyGoal} />
+            <RadialChartWeek goal={dataProfile.weeklyGoal} data={dataActivity} />
         </div>
         <Footer />
     </div>

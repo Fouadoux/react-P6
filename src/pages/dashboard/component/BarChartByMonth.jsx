@@ -1,47 +1,41 @@
 import {useMemo, useState} from "react";
-import {activityByMonth} from "../../../utils/activityByMonth.js";
+import {activityByFourWeeks} from "../../../utils/activityByFourWeeks.js";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
 import useUserActivity from "../../../hooks/useUserActivity.js";
+import {
+    getEndOfWeek,
+    getMonday,
+    getWeekWithOffset
+} from "../../../utils/dateUtils.js";
+import NotFound from "../../notFound/NotFound.jsx";
 
 export default function BarChartByMonth(){
     const now = new Date()
     const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-    const [currentMonth, setCurrentMonth] = useState(yearMonth)
+    const [currentPeriodStart, setCurrentPeriodStart] = useState(() => getWeekWithOffset(getMonday(), -3))
 
+    const startPeriod = currentPeriodStart
 
-    const startOfMonth = useMemo(() => {
-        const [year, month] = currentMonth.split("-")
-        return new Date(year, month - 1, 1)
-    }, [currentMonth])
+    const endPeriod = useMemo(() => {
+        return getEndOfWeek(getWeekWithOffset(currentPeriodStart, 3))
+    }, [currentPeriodStart])
 
-    const endOfMonth = useMemo(() => {
-        const [year, month] = currentMonth.split("-")
-        return new Date(year, month, 0)
-    }, [currentMonth])
+    const { data: data, loading, error } = useUserActivity(startPeriod, endPeriod)
+    if (error) return <NotFound />
+    const dataByFourWeeks = data ? activityByFourWeeks(data, startPeriod) : []
 
-    const { data: data, loading, error } = useUserActivity(startOfMonth, endOfMonth)
-    if (error) return <p>Erreur : {error}</p>
-
-    const dataByMonth = data ? activityByMonth(data,currentMonth) : []
-
-
-    const changeMonth = (offset) => {
-        const date = new Date(currentMonth + "-01")
-        date.setMonth(date.getMonth() + offset)
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        setCurrentMonth(`${year}-${month}`)
+    const changePeriod = (offset) => {
+        setCurrentPeriodStart(getWeekWithOffset(currentPeriodStart, offset * 4))
     }
 
-    const avgDistance = dataByMonth.length
-        ? Math.round(dataByMonth.reduce((sum, w) => sum + w.distance, 0) / dataByMonth.length)
+    const avgDistance = dataByFourWeeks.length
+        ? Math.round(dataByFourWeeks.reduce((sum, w) => sum + w.distance, 0) / dataByFourWeeks.length)
         : 0
 
-    const [year, month] = currentMonth.split("-")
-    const firstDay = new Date(year, month - 1, 1)
-    const lastDay = new Date(year, month, 0)
+
+
     const formatDate = (d) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })
-    const periodLabel = `${formatDate(firstDay)} - ${formatDate(lastDay)}`
+    const periodLabel = `${formatDate(startPeriod)} - ${formatDate(endPeriod)}`
 
     return (
         <div
@@ -56,15 +50,15 @@ export default function BarChartByMonth(){
                 </p>
                     <div className="flex gap-1.5">
                         <button
-                            onClick={() => changeMonth(-1)}
+                            onClick={() => changePeriod(-1)}
                         >
                             <img src="/left.svg" alt="suivant" className="w-6 h-6" />
                         </button>
                         <span className="flex items-center text-[12px] text-[#111111]">{periodLabel}</span>
                         <button
-                            onClick={() => changeMonth(1)}
-                            disabled={currentMonth === yearMonth}
-                            className={currentMonth === yearMonth ? "opacity-30" : ""}
+                            onClick={() => changePeriod(1)}
+                            disabled={currentPeriodStart.toDateString() === getWeekWithOffset(getMonday(), -3).toDateString()}
+                            className={currentPeriodStart.toDateString() === yearMonth ? "opacity-30" : ""}
                         >
                             <img src="/rigth.svg" alt="suivant" className="w-6 h-6" />
                         </button>
@@ -80,12 +74,12 @@ export default function BarChartByMonth(){
 
 
             {/* Chart */}
-            {loading || !dataByMonth ?
+            {loading || !dataByFourWeeks ?
                 <div className="flex items-center justify-center w-full h-[300px]">
                     <div className="w-10 h-10 border-4 border-[#901C1C] border-t-transparent rounded-full animate-spin" />
                 </div> :
             <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={dataByMonth} barSize={40} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <BarChart data={dataByFourWeeks} barSize={40} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <CartesianGrid
                         vertical={false}
                         stroke="#F1F1F1"

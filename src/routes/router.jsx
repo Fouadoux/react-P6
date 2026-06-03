@@ -3,6 +3,7 @@ import Login from "../pages/login/Login.jsx"
 import Dashboard from "../pages/dashboard/Dashboard.jsx"
 import Profile from "../pages/profile/Profile.jsx"
 import ProtectedRoute from "../component/ProtectedRoute.jsx"
+import NotFound from "../pages/notFound/NotFound.jsx";
 
 export const router = createBrowserRouter([
     { path: "/", element: <Login /> },
@@ -22,4 +23,5 @@ export const router = createBrowserRouter([
             </ProtectedRoute>
         ),
     },
+    { path: "*", element: <NotFound /> },
 ])
