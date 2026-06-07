@@ -10,6 +10,7 @@ import {createUserProfile} from "../../models/UserProfile.js";
 import {createUserActivity} from "../../models/UserActivity.js";
 
 export async function clientLoader() {
+
     const token = localStorage.getItem("token")
     const monday = getMonday()
     const endOfWeek = getEndOfWeek(monday)
@@ -21,12 +22,12 @@ export async function clientLoader() {
 
     return {
         profile: createUserProfile(profileData),
-        activity: activityData.map(session => createUserActivity(session)) }
+        activity: activityData.map(session => createUserActivity(session))
+    }
 }
 
 export default function Dashboard({ loaderData }) {
     const { profile, activity } = loaderData
-
     return (
         <>
             <div className="flex flex-col gap-y-27">

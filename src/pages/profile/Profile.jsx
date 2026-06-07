@@ -1,34 +1,36 @@
-import useUserActivity from "../../hooks/useUserActivity.js";
-import useUserProfile from "../../hooks/useUserProfile.js";
 import Header from "../../component/Header.jsx";
-import {useMemo} from "react";
 import Statistical from "./component/Statistical.jsx";
 import ProfileCard from "./component/ProfileCard.jsx";
 import Footer from "../../component/Footer.jsx";
+import {getUserActivity, getUserProfile} from "../../service/service.js";
+import {createUserProfile} from "../../models/UserProfile.js";
+import {createUserActivity} from "../../models/UserActivity.js";
 
-export default function Profile() {
 
-    const endDate = useMemo(() => {
-        return new Date()
-    }, [])
+export async function clientLoader() {
+    const token = localStorage.getItem("token")
 
-    const { data: profile, loading: loadingProfile, error: errorProfile } = useUserProfile()
-    const { data: sessions, loading: loadingSessions, error: errorSessions } = useUserActivity(
-        profile?.createdAt ?? null,
-        profile ? endDate : null
-    )
+    const profileData = await getUserProfile(token)
+    const startDate = profileData?.profile?.createdAt ?? null
+    const endDate = new Date()
 
-    if (loadingProfile || loadingSessions) return <p>Chargement...</p>
-    if (errorProfile || errorSessions) return <p>Erreur</p>
-    if (!profile || !sessions) return null
+    const activityData = await getUserActivity(token, startDate, endDate)
 
+    return {
+        profile: createUserProfile(profileData),
+        activity: activityData.map(session => createUserActivity(session))
+    }
+}
+
+export default function Profile({ loaderData }) {
+    const { profile, activity } = loaderData
     return (
         <>
             <div className="flex flex-col gap-27">
             <Header />
             <div className="flex flex-row gap-14.25 mx-auto">
                 <ProfileCard data={profile}  />
-                <Statistical data={sessions} createdAt={profile.createdAt}
+                <Statistical data={activity} createdAt={profile.createdAt}
                              totalDistance={profile.totalDistance}
                              totalDuration={profile.totalDuration}/>
             </div>

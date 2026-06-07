@@ -1,6 +1,11 @@
 import { Outlet, Scripts, ScrollRestoration } from "react-router";
 import { AuthProvider } from "../src/context/AuthContext.jsx";
 import "../src/index.css";
+import PageLoader from "../src/component/PageLoader.jsx";
+
+export function HydrateFallback() {
+    return <PageLoader  />
+}
 
 export function Layout({ children }) {
     return (
