@@ -9,6 +9,7 @@ import useAuth from "../../../hooks/useAuth.js";
 import {createUserActivity} from "../../../models/UserActivity.js";
 import {getEndOfWeek, getMonday, getWeekWithOffset} from "../../../utils/dateUtils.js";
 import NotFound from "../../notFound/NotFound.jsx";
+import Spinner from "../../../component/Spinner.jsx";
 
 export default function ComposedChartByWeek({data}) {
 
@@ -85,9 +86,7 @@ export default function ComposedChartByWeek({data}) {
 
             {/* Chart */}
             {loading || !dataByDay ?
-                <div className="flex items-center justify-center w-full h-75">
-                    <div className="w-10 h-10 border-4 border-[#901C1C] border-t-transparent rounded-full animate-spin" />
-                </div> :
+                <Spinner /> :
             <ResponsiveContainer width="100%" height={300}>
                 <ComposedChart data={chartData}>
                     <CartesianGrid vertical={false} stroke="#F1F1F1" strokeDasharray="4 4" />

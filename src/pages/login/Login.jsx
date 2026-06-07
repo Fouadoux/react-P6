@@ -23,46 +23,50 @@ export default function Login() {
     }
 
     return (
-        <div className="min-h-screen bg-[#EEEEF8] px-[52px] py-[40px]">
+        <div className="flex min-h-screen">
 
-            {/* Logo */}
-            <img src="/Logo.png" alt="SportSee" />
+            {/* Colonne gauche */}
+            <div className="flex flex-col w-1/2 bg-[#EEEEF8] px-13 py-10">
 
-            {/* Card */}
-            <div className="bg-white rounded-[24px] p-[52px] w-[500px] mx-auto mt-[80px]">
+                {/* Logo */}
+                <img src="/Logo.png" alt="SportSee" className="w-fit" />
+
+                {/* Card formulaire */}
+                <div className="bg-white rounded-3xl p-13 w-125 mx-auto mt-20">
+
 
                 {/* Titre */}
-                <h1 className="text-[36px] font-bold text-[#0B23F4] leading-tight mb-[40px]">
+                <h1 className="text-[36px] font-bold text-[#0B23F4] leading-tight mb-10">
                     Transformez <br /> vos stats en résultats
                 </h1>
 
                 <form onSubmit={handleSubmit} className="flex flex-col">
 
                     {/* Sous-titre */}
-                    <h2 className="text-[22px] font-semibold text-[#111111] mb-[24px]">
+                    <h2 className="text-[22px] font-semibold text-[#111111] mb-6">
                         Se connecter
                     </h2>
 
                     {/* Champs */}
-                    <div className="flex flex-col gap-[20px] mb-[32px]">
-                        <div className="flex flex-col gap-[8px]">
-                            <label className="text-[14px] text-[#707070]">Username</label>
+                    <div className="flex flex-col gap-5 mb-8">
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[14px] text-[#707070]">Adresse email</label>
                             <input
                                 type="text"
                                 required
                                 value={username ?? ""}
                                 onChange={e => setUsername(e.target.value)}
-                                className="border border-gray-300 rounded-[10px] px-[16px] py-[18px] text-[14px] outline-none focus:border-[#0B23F4]"
+                                className="border border-gray-300 rounded-[10px] px-4 py-4.5 text-[14px] outline-none focus:border-[#0B23F4]"
                             />
                         </div>
-                        <div className="flex flex-col gap-[8px]">
+                        <div className="flex flex-col gap-2">
                             <label className="text-[14px] text-[#707070]">Mot de passe</label>
                             <input
                                 type="password"
                                 required
                                 value={password ?? ""}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="border border-gray-300 rounded-[10px] px-[16px] py-[18px] text-[14px] outline-none focus:border-[#0B23F4]"
+                                className="border border-gray-300 rounded-[10px] px-4 py-4.5 text-[14px] outline-none focus:border-[#0B23F4]"
                             />
                         </div>
                     </div>
@@ -70,7 +74,7 @@ export default function Login() {
                     {/* Bouton */}
                     <button
                         type="submit"
-                        className="w-full bg-[#0B23F4] text-white text-[16px] font-medium rounded-[12px] py-[18px] cursor-pointer hover:bg-[#0a1fd8] mb-[24px]"
+                        className="w-full bg-[#0B23F4] text-white text-[16px] font-medium rounded-xl py-4.5 cursor-pointer hover:bg-[#0a1fd8] mb-6"
                     >
                         Se connecter
                     </button>
@@ -82,6 +86,23 @@ export default function Login() {
 
                 </form>
             </div>
+        </div>
+            {/* Colonne droite */}
+            <div className="w-1/2 relative overflow-hidden">
+                <img
+                    src="/background_picture.svg"
+                    alt=""
+                    className="w-full h-full object-cover object-center"
+                    style={{ minHeight: "1024px" }}
+                />
+                {/* Carte texte en bas à droite */}
+                <div className="absolute bottom-6 right-6 bg-white rounded-2xl p-4 max-w-[288px] h-[62]">
+                    <p className="text-[12px] text-[#0B23F4]">
+                        Analysez vos performances en un clin d'œil, suivez vos progrès et atteignez vos objectifs.
+                    </p>
+                </div>
+            </div>
+
         </div>
     )
 }

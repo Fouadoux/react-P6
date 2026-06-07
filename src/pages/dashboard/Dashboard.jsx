@@ -29,9 +29,9 @@ export async function clientLoader() {
 export default function Dashboard({ loaderData }) {
     const { profile, activity } = loaderData
     return (
-        <>
-            <div className="flex flex-col gap-y-27">
-                <Header />
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <div className="flex flex-col gap-y-17.75 flex-1 py-27">
                 <UserCard data={profile} />
                 <div className="flex flex-col gap-y-17.75 m-auto">
                     <div className="flex flex-col gap-y-8">
@@ -43,8 +43,8 @@ export default function Dashboard({ loaderData }) {
                     </div>
                     <RadialChartWeek goal={profile.weeklyGoal} data={activity} />
                 </div>
-                <Footer />
             </div>
-        </>
+            <Footer />
+        </div>
     )
 }

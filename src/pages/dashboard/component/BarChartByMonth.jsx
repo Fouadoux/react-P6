@@ -8,6 +8,7 @@ import {
     getWeekWithOffset
 } from "../../../utils/dateUtils.js";
 import NotFound from "../../notFound/NotFound.jsx";
+import Spinner from "../../../component/Spinner.jsx";
 
 export default function BarChartByMonth(){
     const now = new Date()
@@ -74,10 +75,7 @@ export default function BarChartByMonth(){
 
 
             {/* Chart */}
-            {loading || !dataByFourWeeks ?
-                <div className="flex items-center justify-center w-full h-75">
-                    <div className="w-10 h-10 border-4 border-[#901C1C] border-t-transparent rounded-full animate-spin" />
-                </div> :
+            {loading || !dataByFourWeeks ? <Spinner /> :
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={dataByFourWeeks} barSize={40} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <CartesianGrid

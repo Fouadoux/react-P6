@@ -86,14 +86,14 @@ export default function RadialChartWeek({goal}) {
                             </PieChart>
 
                             {/* Légende "x restants" — en haut à droite */}
-                            <div className="absolute top-2 right-[80px] flex items-center gap-2">
-                                <span className="w-[7px] h-[7px] rounded-full bg-[#B6BDFC] shrink-0" />
+                            <div className="absolute top-2 right-20 flex items-center gap-2">
+                                <span className="w-1.75 h-1.75 rounded-full bg-[#B6BDFC] shrink-0" />
                                 <span className="text-[10px] text-[#707070]">{remaining} restants</span>
                             </div>
 
                             {/* Légende "x réalisées" — en bas à gauche */}
-                            <div className="absolute bottom-2 left-[80px] flex items-center gap-2">
-                                <span className="w-[7px] h-[7px] rounded-full bg-[#0B23F4] shrink-0" />
+                            <div className="absolute bottom-2 left-20 flex items-center gap-2">
+                                <span className="w-1.75 h-1.75 rounded-full bg-[#0B23F4] shrink-0" />
                                 <span className="text-[10px] text-[#707070]">{run} réalisées</span>
                             </div>
                         </div>

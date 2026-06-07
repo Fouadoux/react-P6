@@ -9,7 +9,7 @@ export default function ProfileCard({ data }) {
     const heightCm = data.height % 100
 
     return (
-        <div className="flex flex-col gap-4 w-[508px]">
+        <div className="flex flex-col gap-4 w-127">
 
             {/* Header profil */}
             <div
@@ -20,12 +20,12 @@ export default function ProfileCard({ data }) {
                     <img
                         src={data.profilePicture}
                         alt={`${data.firstName} ${data.lastName}`}
-                        className="w-[104px] h-[117px] rounded-[10px] object-cover shrink-0"
+                        className="w-26 h-29.25 rounded-[10px] object-cover shrink-0"
                         style={{ boxShadow: "0px 4px 84px -40px rgba(157, 167, 251, 0.4)" }}
                     />
                 ) : (
                     <div
-                        className="w-[104px] h-[117px] rounded-[10px] bg-gray-100 flex items-center justify-center text-gray-400 text-2xl font-medium shrink-0"
+                        className="w-26 h-29.25 rounded-[10px] bg-gray-100 flex items-center justify-center text-gray-400 text-2xl font-medium shrink-0"
                         style={{ boxShadow: "0px 4px 84px -40px rgba(157, 167, 251, 0.4)" }}
                     >
                         {data.firstName[0]}{data.lastName[0]}
@@ -50,7 +50,7 @@ export default function ProfileCard({ data }) {
 
             {/* Votre profil */}
             <div
-                className="flex flex-col gap-8 bg-white rounded-[10px] pt-10 px-7 pb-[60px]"
+                className="flex flex-col gap-8 bg-white rounded-[10px] pt-10 px-7 pb-15"
                 style={{ boxShadow: "0px 4px 84px -40px rgba(157, 167, 251, 0.4)" }}
             >
                 <div className="flex flex-col gap-6">

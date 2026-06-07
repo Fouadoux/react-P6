@@ -34,7 +34,7 @@ export default function Header() {
                     Mon profil
                 </NavLink>
 
-                <div className="w-px h-[40px] bg-[#707070]" />
+                <div className="w-px h-10 bg-[#707070]" />
 
                 <button
                     onClick={handleLogout}
