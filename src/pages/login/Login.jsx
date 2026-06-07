@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {loginApi} from "../../service/service.js";
 import useAuth from "../../hooks/useAuth.js";
-import {useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router";
 
 export default function Login() {
 

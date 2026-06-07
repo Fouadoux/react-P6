@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter } from "react-router"
 import Login from "../pages/login/Login.jsx"
 import Dashboard from "../pages/dashboard/Dashboard.jsx"
 import Profile from "../pages/profile/Profile.jsx"
