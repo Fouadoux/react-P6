@@ -75,7 +75,7 @@ export default function BarChartByMonth(){
 
             {/* Chart */}
             {loading || !dataByFourWeeks ?
-                <div className="flex items-center justify-center w-full h-[300px]">
+                <div className="flex items-center justify-center w-full h-75">
                     <div className="w-10 h-10 border-4 border-[#901C1C] border-t-transparent rounded-full animate-spin" />
                 </div> :
             <ResponsiveContainer width="100%" height={300}>

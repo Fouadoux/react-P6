@@ -1,4 +1,4 @@
-import { PieChart, Pie, Legend } from 'recharts'
+import { PieChart, Pie } from 'recharts'
 import useUserActivity from "../../../hooks/useUserActivity.js";
 import {activityByWeek} from "../../../utils/activityByWeek.js";
 import {useMemo} from "react";

@@ -13,7 +13,6 @@ import NotFound from "../../notFound/NotFound.jsx";
 export default function ComposedChartByWeek({data}) {
 
     const {token} = useAuth()
-
     const [currentWeek, setCurrentWeek] = useState(getMonday())
     const [lineHovered, setLineHovered] = useState(false)
     const [dataByDay, setDataByDay] = useState(data)
@@ -86,7 +85,7 @@ export default function ComposedChartByWeek({data}) {
 
             {/* Chart */}
             {loading || !dataByDay ?
-                <div className="flex items-center justify-center w-full h-[300px]">
+                <div className="flex items-center justify-center w-full h-75">
                     <div className="w-10 h-10 border-4 border-[#901C1C] border-t-transparent rounded-full animate-spin" />
                 </div> :
             <ResponsiveContainer width="100%" height={300}>
@@ -139,8 +138,8 @@ export default function ComposedChartByWeek({data}) {
                 </div>
                 <div className="flex items-center gap-1">
                 <span className="relative inline-flex items-center w-4 h-4">
-                    <span className="absolute w-[11px] h-[1px] bg-[#B6BDFC] left-0 top-1/2" />
-                    <span className="absolute w-[7px] h-[7px] rounded-full bg-[#0B23F4] border border-white left-[2px] top-1/2 -translate-y-1/2" />
+                    <span className="absolute w-2.75 h-px bg-[#B6BDFC] left-0 top-1/2" />
+                    <span className="absolute w-1.75 h-1.75 rounded-full bg-[#0B23F4] border border-white left-0.5 top-1/2 -translate-y-1/2" />
                 </span>
                     <span className="text-[12px] text-[#707070]">Moy BPM</span>
                 </div>
