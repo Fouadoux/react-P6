@@ -22,8 +22,14 @@ export default function RadialChartWeek({goal}) {
     }, [currentWeek])
 
     const { data: dataByDay, loading, error } = useUserActivity(currentWeek, endOfWeek)
-    if (error) return <p>Erreur : {error}</p>
-    console.log("RadialChartWeek data ",goal)
+
+    if (error) return (
+        <div className="bg-white rounded-2xl p-6 flex flex-col justify-center items-center h-40">
+            <p className="text-[#F4320B] text-[14px] font-medium">Erreur de chargement</p>
+            <p className="text-[#707070] text-[12px] mt-1">Les données ne sont pas disponibles</p>
+        </div>
+    )
+
     const chartData = dataByDay ? activityByWeek(dataByDay, currentWeek, endOfWeek) : []
 
     const distance = chartData.length
@@ -31,7 +37,7 @@ export default function RadialChartWeek({goal}) {
         : 0
 
     const duration = chartData.length
-        ? Math.round(chartData.reduce((sum, w) => sum + w.duration, 0))
+        ? Math.round(chartData.reduce((sum, w) => sum + w.duration, 0)) //supprimer le rounded
         : 0
 
     const run = chartData.filter(w => w.distance > 0).length

@@ -9,10 +9,17 @@ export const activityByFourWeeks = (data, startPeriod) => {
         }
     })
 
-    return [
-        { week: "S1", distance: weeks.S1 },
-        { week: "S2", distance: weeks.S2 },
-        { week: "S3", distance: weeks.S3 },
-        { week: "S4", distance: weeks.S4 },
-    ]
+    const formatDate = (d) => d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })
+
+    return [1, 2, 3, 4].map(num => {
+        const start = new Date(startPeriod)
+        start.setDate(start.getDate() + (num - 1) * 7)
+        const end = new Date(start)
+        end.setDate(end.getDate() + 6)
+        return {
+            week: `S${num}`,
+            weekLabel: `${formatDate(start)} au ${formatDate(end)}`,
+            distance: Math.round(weeks[`S${num}`] * 10) / 10
+        }
+    })
 }

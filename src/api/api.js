@@ -19,7 +19,8 @@ export const getUserActivity = async (token, startWeek, endWeek) => {
         }
     })
     if (!response.ok) {
-        throw new Error("Erreur lors de la récupération de l'activité")
+      console.log("Erreur lors de la récupération de l'activité")
+        return null
     }
     return response.json()
 }

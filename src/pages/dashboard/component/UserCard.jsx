@@ -29,7 +29,7 @@ export default function UserCard({data}) {
                 <p className="text-[14px] text-[#707070] m-0 leading-4.25">
                     Distance totale parcourue
                 </p>
-                <div className="flex items-center justify-center bg-[#0B23F4] rounded-[10px] border border-[#0B23F4] w-45.75 h-22.5">
+                <div className="flex items-center justify-center bg-[#0B23F4] rounded-[10px] border border-[#E7E7E7] w-45.75 h-22.5">
                     <span className="text-[22px] font-medium text-white leading-6.75">
                         {data.totalDistance} km
                     </span>
