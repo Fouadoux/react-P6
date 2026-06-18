@@ -1,0 +1,42 @@
+{
+  "info": {
+    "name": "Sportsee - Mistral AI (Plan d'entrainement 6 semaines)",
+    "description": "Collection des requetes API Mistral pour la generation de plans d'entrainement personnalises (Projet React P6 Sportsee). Tache 1 : preparation et documentation des requetes API. Les donnees du body proviennent du formulaire d'onboarding utilisateur (objectif, niveau, disponibilites, preferences, contraintes).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.mistral.ai", "type": "string" },
+    { "key": "model", "value": "mistral-small-latest", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{MISTRAL_API_KEY}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "1. Lister les modeles disponibles",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/v1/models", "host": ["{{baseUrl}}"], "path": ["v1", "models"] },
+        "description": "Verifie l'acces a l'API et liste les modeles + leur taille de contexte (utile pour la Tache 3)."
+      }
+    },
+    {
+      "name": "2. Generer un plan d'entrainement (Chat Completions)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": { "raw": "{{baseUrl}}/v1/chat/completions", "host": ["{{baseUrl}}"], "path": ["v1", "chat", "completions"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": \"{{model}}\",\n  \"temperature\": 0.3,\n  \"max_tokens\": 2000,\n  \"response_format\": { \"type\": \"json_object\" },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un coach de course a pied. Tu generes un plan d'entrainement personnalise sur 6 semaines. Tu reponds UNIQUEMENT en JSON valide, sans texte autour, selon le schema fourni par l'utilisateur.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Donnees du coureur (issues du formulaire d'onboarding):\\n- Objectif: semi-marathon\\n- Date de la course: 2026-08-03\\n- Temps cible: 1h50\\n- Niveau: intermediaire\\n- Volume actuel: 25 km/semaine\\n- Derniere performance: 8 km en 47 min\\n- Jours disponibles: lundi, mercredi, samedi\\n- Moment prefere: matin\\n- Duree par seance: 60 min\\n- Contraintes physiques: genou sensible\\n- Conseils nutrition souhaites: oui\\n- Date de depart du plan: 2026-06-22\\n\\nRetourne le plan au format JSON suivant:\\n{\\n  \\\"objectif\\\": string,\\n  \\\"semaines\\\": [\\n    { \\\"numero\\\": number, \\\"sessions\\\": [ { \\\"date\\\": \\\"YYYY-MM-DD\\\", \\\"type\\\": string, \\\"duree_min\\\": number, \\\"distance_km\\\": number, \\\"vitesse_cible\\\": string, \\\"conseil_alimentation\\\": string } ] }\\n  ]\\n}\"\n    }\n  ]\n}"
+        },
+        "description": "Requete principale : envoie les donnees du formulaire (objectif, niveau, disponibilites, preferences, contraintes) et recupere un plan structure en JSON."
+      }
+    }
+  ]
+}
