@@ -15,7 +15,7 @@ export default function Login() {
         e.preventDefault()
         try {
             setError(false)
-            const token = await loginApi(username, password)
+            await loginApi(username, password)
             login()
             navigate("/dashboard")
         } catch (error) {

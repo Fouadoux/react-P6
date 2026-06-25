@@ -11,11 +11,11 @@ export const getUserProfile = async () => {
 }
 
 export const getUserActivity = async (startWeek, endWeek) => {
-    const response = await fetch(`${BASE_URL}/api/user-activity?startWeek=${startWeek}&endWeek=${endWeek}`, {
+    const response = await fetch(`${BASE_URL}/api/user1-activity?startWeek=${startWeek}&endWeek=${endWeek}`, {
             credentials: "include"
     })
     if (!response.ok) {
-      console.log("Erreur lors de la récupération de l'activité")
+      console.error("Erreur lors de la récupération de l'activité")
         return null
     }
     return response.json()
@@ -24,6 +24,7 @@ export const getUserActivity = async (startWeek, endWeek) => {
 export async function loginApi(username, password) {
     const response = await fetch("http://localhost:8000/api/login", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
     })

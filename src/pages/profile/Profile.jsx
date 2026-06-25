@@ -25,7 +25,7 @@ export async function clientLoader() {
             : null
         const endDate = new Date()
         const activityData = await getUserActivity(startDate, endDate)
-        activity = activityData.map(session => createUserActivity(session))
+        activity = activityData ? activityData.map(session => createUserActivity(session)) : []
     } catch (err) {
         console.error("Erreur activité:", err.message)
     }
