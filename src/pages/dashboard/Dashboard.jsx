@@ -6,12 +6,10 @@ import {getEndOfWeek, getMonday} from "../../utils/dateUtils.js";
 import {getUserActivity, getUserProfile} from "../../service/service.js";
 import {createUserProfile} from "../../models/UserProfile.js";
 import {createUserActivity} from "../../models/UserActivity.js";
-import useAuth from "../../hooks/useAuth.js";
 
 import {redirect} from "react-router";
 
 export async function clientLoader() {
-    const token =  localStorage.getItem("token")
     const monday = getMonday()
     const endOfWeek = getEndOfWeek(monday)
 
@@ -19,7 +17,7 @@ export async function clientLoader() {
     let activity = null
 
     try {
-        const profileData = await getUserProfile(token)
+        const profileData = await getUserProfile()
         profile = createUserProfile(profileData)
     } catch (err) {
         console.error("Erreur profil:", err.message)
@@ -27,7 +25,7 @@ export async function clientLoader() {
     }
 
     try {
-        const activityData = await getUserActivity(token, monday, endOfWeek)
+        const activityData = await getUserActivity(monday, endOfWeek)
         activity = activityData.map(session => createUserActivity(session))
     } catch (err) {
         console.error("Erreur activité:", err.message)

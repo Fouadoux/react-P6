@@ -7,13 +7,12 @@ import {redirect} from "react-router";
 
 
 export async function clientLoader() {
-    const token = localStorage.getItem("token")
 
     let profile = null
     let activity = []
 
     try {
-        const profileData = await getUserProfile(token)
+        const profileData = await getUserProfile()
         profile = createUserProfile(profileData)
     } catch (err) {
         console.error("Erreur profil:", err.message)
@@ -25,7 +24,7 @@ export async function clientLoader() {
             ? profile.createdAt
             : null
         const endDate = new Date()
-        const activityData = await getUserActivity(token, startDate, endDate)
+        const activityData = await getUserActivity(startDate, endDate)
         activity = activityData.map(session => createUserActivity(session))
     } catch (err) {
         console.error("Erreur activité:", err.message)

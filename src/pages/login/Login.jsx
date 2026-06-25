@@ -16,7 +16,7 @@ export default function Login() {
         try {
             setError(false)
             const token = await loginApi(username, password)
-            login(token)
+            login()
             navigate("/dashboard")
         } catch (error) {
             setError(true)

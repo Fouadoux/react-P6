@@ -5,7 +5,7 @@ import Footer from "./Footer.jsx";
 import Header from "./Header.jsx";
 
 export default function ProtectedRoute() {
-    const { token } = useContext(AuthContext)
+    const { isAuthenticated } = useContext(AuthContext)
     const location = useLocation()
     const ref = useRef(null)
 
@@ -17,7 +17,7 @@ export default function ProtectedRoute() {
         }
     }, [location.pathname])
 
-    if (!token) return <Navigate to="/" replace />
+    if (!isAuthenticated) return <Navigate to="/" replace />
 
     return (
         <>
