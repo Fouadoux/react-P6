@@ -5,19 +5,21 @@ import {useNavigate} from "react-router";
 
 export default function Login() {
 
-
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const [error, setError] = useState(false)
     const navigate = useNavigate()
     const { login } = useAuth()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
+            setError(false)
             const token = await loginApi(username, password)
             login(token)
             navigate("/dashboard")
         } catch (error) {
+            setError(true)
             console.error(error.message)
         }
     }
@@ -26,69 +28,75 @@ export default function Login() {
         <div className="flex min-h-screen">
 
             {/* Colonne gauche */}
-            <div className="flex flex-col w-1/2 bg-[#EEEEF8] px-13 py-10">
+            <div className="flex flex-col shrink-0 bg-[#F2F3FF] pt-[55px] pb-[55px] pl-[100px] pr-0 gap-[151px]" style={{ width: "632px" }}>
 
                 {/* Logo */}
                 <img src="/Logo.png" alt="SportSee" className="w-fit" />
 
                 {/* Card formulaire */}
-                <div className="bg-white rounded-3xl p-13 w-125 mx-auto mt-20">
+                <div className="bg-white rounded-[20px] w-[398px] flex flex-col justify-center items-start gap-[40px]" style={{ padding: "40px 40px 80px" }}>
 
+                    {/* Titre */}
+                    <h1 className="text-[28px] font-semibold text-[#0B23F4] leading-[34px]">
+                        Transformez <br /> vos stats en résultats
+                    </h1>
 
-                {/* Titre */}
-                <h1 className="text-[36px] font-bold text-[#0B23F4] leading-tight mb-10">
-                    Transformez <br /> vos stats en résultats
-                </h1>
+                    {/* Formulaire */}
+                    <form onSubmit={handleSubmit} className="flex flex-col items-center gap-[24px] w-full">
 
-                <form onSubmit={handleSubmit} className="flex flex-col">
+                        {/* Sous-titre */}
+                        <h2 className="text-[22px] font-medium text-[#111111] w-full leading-[27px]">
+                            Se connecter
+                        </h2>
 
-                    {/* Sous-titre */}
-                    <h2 className="text-[22px] font-semibold text-[#111111] mb-6">
-                        Se connecter
-                    </h2>
-
-                    {/* Champs */}
-                    <div className="flex flex-col gap-5 mb-8">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[14px] text-[#707070]">Adresse email</label>
-                            <input
-                                type="text"
-                                required
-                                value={username ?? ""}
-                                onChange={e => setUsername(e.target.value)}
-                                className="border border-gray-300 rounded-[10px] px-4 py-4.5 text-[14px] outline-none focus:border-[#0B23F4]"
-                            />
+                        {/* Champs */}
+                        <div className="flex flex-col gap-[8px] w-full">
+                            <div className="flex flex-col gap-[8px]">
+                                <label className="text-[14px] text-[#707070] leading-[17px]">Adresse email</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={username ?? ""}
+                                    onChange={e => setUsername(e.target.value)}
+                                    className="w-full h-[58px] border border-[0.5px] border-[#717171] rounded-[10px] px-5 text-[14px] outline-none focus:border-[#0B23F4] bg-white"
+                                />
+                            </div>
+                            <div className="flex flex-col gap-[8px]">
+                                <label className="text-[14px] text-[#707070] leading-[17px]">Mot de passe</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={password ?? ""}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full h-[58px] border border-[0.5px] border-[#717171] rounded-[10px] px-5 text-[14px] outline-none focus:border-[#0B23F4] bg-white"
+                                />
+                            </div>
                         </div>
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[14px] text-[#707070]">Mot de passe</label>
-                            <input
-                                type="password"
-                                required
-                                value={password ?? ""}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="border border-gray-300 rounded-[10px] px-4 py-4.5 text-[14px] outline-none focus:border-[#0B23F4]"
-                            />
-                        </div>
-                    </div>
 
-                    {/* Bouton */}
-                    <button
-                        type="submit"
-                        className="w-full bg-[#0B23F4] text-white text-[16px] font-medium rounded-xl py-4.5 cursor-pointer hover:bg-[#0a1fd8] mb-6"
-                    >
-                        Se connecter
-                    </button>
+                        {error &&
+                            <p className="text-center text-sm text-red-600 w-full">Email ou mot de passe inconnue</p>
+                        }
 
-                    {/* Mot de passe oublié */}
-                    <p className="text-[14px] text-[#111111] cursor-pointer hover:text-[#0B23F4]">
-                        Mot de passe oublié ?
-                    </p>
+                        {/* Bouton */}
+                        <button
+                            type="submit"
+                            className="w-full h-[51px] bg-[#0B23F4] text-[#E7E7E7] text-[16px] font-medium rounded-[10px] cursor-pointer hover:bg-[#0a1fd8]"
+                        >
+                            Se connecter
+                        </button>
 
-                </form>
+                        {/* Mot de passe oublié */}
+                        <p className="text-[14px] text-[#111111] text-center cursor-pointer hover:text-[#0B23F4]">
+                            Mot de passe oublié ?
+                        </p>
+
+                    </form>
+
+                </div>
             </div>
-        </div>
-            {/* Colonne droite */}
-            <div className="w-1/2 relative overflow-hidden">
+
+            {/* Colonne droite — prend tout l'espace restant */}
+            <div className="flex-1 relative overflow-hidden">
                 <img
                     src="/background_picture.svg"
                     alt=""
@@ -96,7 +104,7 @@ export default function Login() {
                     style={{ minHeight: "1024px" }}
                 />
                 {/* Carte texte en bas à droite */}
-                <div className="absolute bottom-6 right-6 bg-white rounded-2xl p-4 max-w-[288px] h-[62]">
+                <div className="absolute bottom-6 right-6 bg-white rounded-2xl p-4 max-w-[288px]">
                     <p className="text-[12px] text-[#0B23F4]">
                         Analysez vos performances en un clin d'œil, suivez vos progrès et atteignez vos objectifs.
                     </p>

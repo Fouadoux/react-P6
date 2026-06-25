@@ -1,7 +1,6 @@
 export default function Footer() {
     return (
-        <footer className="flex items-center justify-between px-25 py-2.5 w-full bg-white">
-
+        <footer className="mt-20 flex items-center justify-between px-30 py-2.5 w-full bg-white">
             {/* Gauche */}
             <div className="flex items-center gap-2.25">
                 <span className="text-[14px] text-[#111111]">©Sportsee</span>

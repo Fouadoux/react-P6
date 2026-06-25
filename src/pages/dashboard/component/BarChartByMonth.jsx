@@ -62,35 +62,32 @@ export default function BarChartByMonth(){
             style={{ width: 445, boxShadow: "0px 4px 84px -40px rgba(157, 167, 251, 0.4)" }}
         >
             {/* Header */}
-            <div className="flex flex-row items-center pb-2 w-full h-[103px]">
-                <div className="flex flex-row justify-between items-center pb-8 w-full h-[95px]">
+            <div className="flex flex-col justify-between w-full h-[95px] pb-8 gap-[9px]">
 
-                    <div className="flex flex-col justify-between items-start h-[63px]">
-                        <div />
-                        <p className="text-[22px] font-medium text-[#0B23F4] m-0 leading-[27px]">
+                <div className="flex flex-row items-center justify-between mt-[11px] h-[27px]">
+                        <p className="text-[22px] font-medium text-[#0B23F4] ">
                             {avgDistance}km en moyenne
                         </p>
-                        <p className="text-[12px] text-[#707070] m-0 leading-[15px]">
-                            Total des kilomètres 4 dernières semaines
-                        </p>
-                    </div>
-
-                    <div className="flex gap-1.5">
+                    <div className="flex flex-row justify-between items-center w-[150px] ">
                         <button onClick={() => changePeriod(-1)}>
-                            <img src="/left.svg" alt="suivant" className="w-6 h-6" />
+                            <img src="/left.svg" alt="suivant" className="w-6 h-6"/>
                         </button>
-                        <span className="flex items-center text-[12px] text-[#111111]">{periodLabel}</span>
+                        <span className="flex  text-[12px] text-[#111111]">{periodLabel}</span>
                         <button
                             onClick={() => changePeriod(1)}
                             disabled={currentPeriodStart.toDateString() === getWeekWithOffset(getMonday(), -3).toDateString()}
                             className={currentPeriodStart.toDateString() === yearMonth ? "opacity-30" : ""}
                         >
-                            <img src="/rigth.svg" alt="suivant" className="w-6 h-6" />
+                            <img src="/rigth.svg" alt="suivant" className="w-6 h-6"/>
                         </button>
                     </div>
-
                 </div>
+                    <p className="text-[12px] text-[#707070]">
+                        Total des kilomètres 4 dernières semaines
+                    </p>
             </div>
+
+
 
 
 
@@ -98,16 +95,15 @@ export default function BarChartByMonth(){
 
             {loading || !dataByFourWeeks ? <Spinner /> :
                 <div
-                    className="bg-white rounded-[10px] pt-4 pb-6"
-                    style={{ width: 360}}
+                    className="bg-white rounded-[10px] "
+                    style={{ width: 330, height: 307 }}
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                 >
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={307}>
                 <BarChart
                     data={dataByFourWeeks}
-                    barSize={40}
-                    margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
+                    margin={{ top: 30, right: 0, left: 0, bottom: 20 }}
                 >
                     <CartesianGrid
                         vertical={false}
@@ -118,14 +114,15 @@ export default function BarChartByMonth(){
                         dataKey="week"
                         axisLine={{ stroke: "#717171" }}
                         tickLine={false}
-                        tick={{ fill: "#707070", fontSize: 12 }}
+                        tick={{ fill: "#707070", fontSize: 12, dy: 20 }}
+                        height={16}
                     />
                     <YAxis
                         domain={[0, 30]}
                         ticks={[0, 10, 20, 30]}
                         axisLine={{ stroke: "#717171" }}
                         tickLine={false}
-                        tick={{ fill: "#707070", fontSize: 10 }}
+                        tick={{ fill: "#707070", fontSize: 10, dy: -10, dx: -5}}
                         width={25}
                     />
                     <Tooltip content={<CustomTooltip />} cursor={false} />
@@ -138,7 +135,7 @@ export default function BarChartByMonth(){
 
 
             {/* Légende */}
-            <div className="flex items-center gap-1 pt-3">
+            <div className="flex items-center gap-1 mt-2 ml-1">
                 <span className="w-2 h-2 rounded-full bg-[#7987FF] inline-block" />
                 <span className="text-[12px] text-[#707070]">Km</span>
             </div>

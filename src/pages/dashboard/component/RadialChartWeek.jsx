@@ -59,46 +59,46 @@ export default function RadialChartWeek({goal}) {
     return (
         <div className="" >
             {/* Titre */}
-            <h2 className="text-xl font-bold mb-1">Cette semaine</h2>
-            <p className="text-sm text-gray-400 mb-6">{periodLabel}</p>
+            <h2 className="text-[22px] font-medium">Cette semaine</h2>
+            <p className="text-[16px] text-gray-400 mb-8">{periodLabel}</p>
 
-            <div className="flex gap-4">
+            <div className="flex gap-7.5">
                 {/* Card gauche — Donut */}
-                <div className="bg-white rounded-2xl p-6 flex-1">
-                    <p className="text-lg font-bold mb-1">
-                        <span className="text-blue-600 text-2xl">x{run}</span>
-                        <span className="text-blue-300 text-base font-normal"> sur objectif de {goal}</span>
+                <div className="bg-white rounded-[10px] px-8 py-4 w-[450px] h-[342px]">
+                    <p className="text-lg font-bold flex flex-row ">
+                        <span className="text-blue-600 text-[28px] font-semibold mt-[1px] ml-[6px]">x{run}</span>
+                        <span className="text-blue-300 text-base font-normal pl-[6px] flex items-center"> sur objectif de {goal}</span>
                     </p>
-                    <p className="text-sm text-gray-400 mb-4">Courses hebdomadaire réalisées</p>
+                    <p className="text-sm text-gray-400 ml-[6px]">Courses hebdomadaire réalisées</p>
 
                     {loading || !dataByDay ?
                        <Spinner/> :
-                        <div className="relative flex justify-center ">
-                            <PieChart width={220} height={220}>
+                        <div className="relative flex justify-center mt-15 ml-[24px]">
+                            <PieChart width={162} height={162} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                                 <Pie
                                     data={pieData}
                                     dataKey="value"
-                                    cx={100}
-                                    cy={100}
-                                    innerRadius={50}
-                                    outerRadius={95}
-                                    startAngle={135}
-                                    endAngle={495}
-                                    paddingAngle={0}
+                                    cx={81}
+                                    cy={81}
+                                    innerRadius={40}
+                                    outerRadius={80}
+                                    startAngle={123}
+                                    endAngle={483}
+                                    paddingAngle={1}
                                     strokeWidth={0}
                                     stroke="none"
-                                    cornerRadius={2}
+                                    cornerRadius={3}
                                 />
                             </PieChart>
 
-                            {/* Légende "x restants" — en haut à droite */}
-                            <div className="absolute top-2 right-20 flex items-center gap-2">
+                            {/*/!* Légende "x restants" — en haut à droite *!/*/}
+                            <div className="absolute -top-1 right-18 flex items-center gap-1">
                                 <span className="w-1.75 h-1.75 rounded-full bg-[#B6BDFC] shrink-0" />
                                 <span className="text-[10px] text-[#707070]">{remaining} restants</span>
                             </div>
 
                             {/* Légende "x réalisées" — en bas à gauche */}
-                            <div className="absolute bottom-2 left-20 flex items-center gap-2">
+                            <div className="absolute bottom-6.75 left-10.75 flex items-center gap-1">
                                 <span className="w-1.75 h-1.75 rounded-full bg-[#0B23F4] shrink-0" />
                                 <span className="text-[10px] text-[#707070]">{run} réalisées</span>
                             </div>
@@ -107,16 +107,16 @@ export default function RadialChartWeek({goal}) {
                 </div>
 
                 {/* Cards droite */}
-                <div className="flex flex-col gap-4 flex-1">
-                    <div className="bg-white rounded-2xl p-6">
-                        <p className="text-sm text-gray-400 mb-2">Durée d'activité</p>
-                        <p className="text-3xl font-bold text-blue-600">
+                <div className="flex flex-col gap-4 w-143 ">
+                    <div className="bg-white rounded-[10px] py-5 px-7.5">
+                        <p className="text-sm text-gray-400 mt-[-2px] pb-[14px]">Durée d'activité</p>
+                        <p className="text-[22px] text-blue-600 font-medium pl-[1px]">
                             {duration} <span className="text-base font-normal text-blue-300">minutes</span>
                         </p>
                     </div>
-                    <div className="bg-white rounded-2xl p-6">
-                        <p className="text-sm text-gray-400 mb-2">Distance</p>
-                        <p className="text-3xl font-bold text-[#F4320B]">
+                    <div className="bg-white rounded-[10px] py-5 px-7.5">
+                        <p className="text-sm text-gray-400 mt-[-5px] pb-[14px]">Distance</p>
+                        <p className="text-[22px] text-[#F4320B] font-medium pl-[0px]">
                             {distance} <span className="text-base font-normal text-[#F4320B] opacity-60">kilomètres</span>
                         </p>
                     </div>

@@ -26,14 +26,12 @@ export default function Profile({ loaderData }) {
     const { profile, activity } = loaderData
     return (
         <div className="flex flex-col min-h-screen">
-            <Header />
             <div className="flex flex-row gap-14.25 mx-auto flex-1 py-27">
                 <ProfileCard data={profile} />
                 <Statistical data={activity} createdAt={profile.createdAt}
                              totalDistance={profile.totalDistance}
                              totalDuration={profile.totalDuration}/>
             </div>
-            <Footer />
         </div>
     )
 }

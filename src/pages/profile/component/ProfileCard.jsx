@@ -17,12 +17,14 @@ export default function ProfileCard({ data }) {
                 style={{ boxShadow: "0px 4px 84px -40px rgba(157, 167, 251, 0.4)" }}
             >
                 {data.profilePicture ? (
+                        <div className="overflow-hidden rounded-[10px] shrink-0">
                     <img
                         src={data.profilePicture}
                         alt={`${data.firstName} ${data.lastName}`}
-                        className="w-26 h-29.25 rounded-[10px] object-cover shrink-0"
+                        className="w-26 h-29.25 rounded-[10px] object-cover shrink-0 transition-transform duration-300 hover:scale-150"
                         style={{ boxShadow: "0px 4px 84px -40px rgba(157, 167, 251, 0.4)" }}
                     />
+                        </div>
                 ) : (
                     <div
                         className="w-26 h-29.25 rounded-[10px] bg-gray-100 flex items-center justify-center text-gray-400 text-2xl font-medium shrink-0"
