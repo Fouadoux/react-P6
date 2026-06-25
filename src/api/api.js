@@ -3,7 +3,7 @@ const BASE_URL = "http://localhost:8000"
 export const getUserProfile = async (token) => {
     const response = await fetch(`${BASE_URL}/api/user-info`, {
         headers: {
-            Authorization: `Bearer ${token}`
+            credentials: "include"
         }
     })
     if (!response.ok) {
@@ -15,7 +15,7 @@ export const getUserProfile = async (token) => {
 export const getUserActivity = async (token, startWeek, endWeek) => {
     const response = await fetch(`${BASE_URL}/api/user-activity?startWeek=${startWeek}&endWeek=${endWeek}`, {
         headers: {
-            Authorization: `Bearer ${token}`
+            credentials: "include"
         }
     })
     if (!response.ok) {
