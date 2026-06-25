@@ -1,25 +1,37 @@
-import Header from "../../component/Header.jsx";
 import Statistical from "./component/Statistical.jsx";
 import ProfileCard from "./component/ProfileCard.jsx";
-import Footer from "../../component/Footer.jsx";
 import {getUserActivity, getUserProfile} from "../../service/service.js";
 import {createUserProfile} from "../../models/UserProfile.js";
 import {createUserActivity} from "../../models/UserActivity.js";
+import {redirect} from "react-router";
 
 
 export async function clientLoader() {
     const token = localStorage.getItem("token")
 
-    const profileData = await getUserProfile(token)
-    const startDate = profileData?.profile?.createdAt ?? null
-    const endDate = new Date()
+    let profile = null
+    let activity = []
 
-    const activityData = await getUserActivity(token, startDate, endDate)
-
-    return {
-        profile: createUserProfile(profileData),
-        activity: activityData.map(session => createUserActivity(session))
+    try {
+        const profileData = await getUserProfile(token)
+        profile = createUserProfile(profileData)
+    } catch (err) {
+        console.error("Erreur profil:", err.message)
+        return redirect("/not-found")
     }
+
+    try {
+        const startDate = profile.createdAt instanceof Date && !isNaN(profile.createdAt)
+            ? profile.createdAt
+            : null
+        const endDate = new Date()
+        const activityData = await getUserActivity(token, startDate, endDate)
+        activity = activityData.map(session => createUserActivity(session))
+    } catch (err) {
+        console.error("Erreur activité:", err.message)
+    }
+
+    return { profile, activity }
 }
 
 export default function Profile({ loaderData }) {

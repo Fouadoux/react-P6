@@ -2,8 +2,6 @@ import UserCard from "./component/UserCard.jsx";
 import BarChartByMonth from "./component/BarChartByMonth.jsx";
 import ComposedChartByWeek from "./component/ComposedChartByWeek.jsx";
 import RadialChartWeek from "./component/RadialChartWeek.jsx";
-import Header from "../../component/Header.jsx";
-import Footer from "../../component/Footer.jsx";
 import {getEndOfWeek, getMonday} from "../../utils/dateUtils.js";
 import {getUserActivity, getUserProfile} from "../../service/service.js";
 import {createUserProfile} from "../../models/UserProfile.js";

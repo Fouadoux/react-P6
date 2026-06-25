@@ -51,7 +51,7 @@ export default function BarChartByMonth(){
         return (
             <div className="bg-[#1C1C1C] rounded-lg px-4 py-3 shadow-md">
                 <p className="text-[12px] text-white/70 mb-1">{payload[0]?.payload?.weekLabel}</p>
-                <p className="text-[16px] font-bold text-white">{payload[0]?.value} km</p>
+                <p className="text-[16px] font-medium text-white">{payload[0]?.value} km</p>
             </div>
         )
     }

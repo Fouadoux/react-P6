@@ -19,7 +19,7 @@ export const activityByFourWeeks = (data, startPeriod) => {
         return {
             week: `S${num}`,
             weekLabel: `${formatDate(start)} au ${formatDate(end)}`,
-            distance: Math.round(weeks[`S${num}`] * 10) / 10
+            distance: parseFloat(weeks[`S${num}`].toFixed(1))
         }
     })
 }
