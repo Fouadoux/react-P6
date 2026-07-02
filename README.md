@@ -1,21 +1,72 @@
-# React + Vite
+# SportSee
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Tableau de bord React affichant les statistiques d'activité sportive d'un utilisateur (profil, activité quotidienne, sessions, performances), avec authentification par token.
 
-Currently, two official plugins are available:
+## Stack technique
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** + **React Router 7** (mode framework / SSR)
+- **Vite** pour le dev server et le build
+- **Tailwind CSS**
+- **Recharts** pour les graphiques
 
-## React Compiler
+## Structure du projet
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+app/                  Point d'entrée React Router (root, routes)
+src/
+  api/                Appels API réels (api.js) et données simulées (apiMock.js)
+  component/          Composants partagés (Header, Footer, ProtectedRoute, Spinner...)
+  context/            AuthContext : gestion du token d'authentification
+  hooks/              useAuth, useUserActivity, useUserProfile
+  models/             Modèles de données (UserActivity, UserProfile)
+  pages/              Pages : login, dashboard, profile, notFound
+  utils/              Fonctions utilitaires (calculs par semaine, dates)
+docs/ai-integration/  Documentation d'une intégration exploratoire avec l'API Mistral
+```
 
-## Expanding the ESLint configuration
+## Prérequis
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Une API back-end exposant `/api/login`, `/api/user-info` et `/api/user-activity` sur `http://localhost:8000` (voir `src/api/api.js`)
 
-faire la gestion des erreurs
-modifier le tout ou rien des apples api
-utiliser le context pour le token
-faire les annimation 
+## Installation
+
+```bash
+npm install
+```
+
+## Configuration
+
+Variables d'environnement (`.env`) :
+
+```
+VITE_USE_MOCK=false
+```
+
+- `VITE_USE_MOCK=true` : utilise les données simulées de `src/mock/` via `apiMock.js`
+- `VITE_USE_MOCK=false` : utilise l'API réelle (`api.js`)
+
+## Développement
+
+```bash
+npm run dev
+```
+
+## Build & production
+
+```bash
+npm run build
+npm start
+```
+
+## Lint
+
+```bash
+npm run lint
+```
+
+## Routes
+
+- `/` : page de connexion
+- `/dashboard` : tableau de bord (protégé, nécessite un token)
+- `/profile` : profil utilisateur (protégé, nécessite un token)
+
