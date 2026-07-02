@@ -45,12 +45,12 @@ suffit largement, ce qui limite le coût par requête.
 
 ## 4. Paramètres qui influencent la qualité des réponses
 
-| Paramètre | Rôle | Valeur retenue pour Sportsee | Pourquoi |
-|---|---|---|---|
-| `temperature` | Contrôle le hasard / la créativité (0 = très déterministe, 1+ = très créatif) | `0.3` | On veut un plan cohérent et reproductible, pas une réponse créative — deux appels avec les mêmes données doivent donner des plans très similaires |
+| Paramètre | Rôle | Valeur retenue pour Sportsee                             | Pourquoi |
+|---|---|----------------------------------------------------------|---|
+| `temperature` | Contrôle le hasard / la créativité (0 = très déterministe, 1+ = très créatif) | `0.3`                                                    | On veut un plan cohérent et reproductible, pas une réponse créative — deux appels avec les mêmes données doivent donner des plans très similaires |
 | `top_p` | Alternative à la température : restreint le tirage aux tokens les plus probables (nucleus sampling) | non utilisé (on ne combine pas `top_p` et `temperature`) | Un seul levier de contrôle de l'aléa suffit, pour rester prévisible |
-| `max_tokens` | Limite la taille de la réponse générée | `2000` | Un plan sur 6 semaines en JSON reste largement sous cette limite ; ça évite une réponse tronquée ou un coût incontrôlé si le modèle part en boucle |
-| `response_format` | Force le modèle à répondre en JSON strict (`{"type": "json_object"}`) | activé | Indispensable pour parser la réponse côté React sans avoir à extraire du texte libre |
+| `max_tokens` | Limite la taille de la réponse générée | `4000`                                                   | Un plan sur 6 semaines en JSON reste largement sous cette limite ; ça évite une réponse tronquée ou un coût incontrôlé si le modèle part en boucle |
+| `response_format` | Force le modèle à répondre en JSON strict (`{"type": "json_object"}`) | activé                                                   | Indispensable pour parser la réponse côté React sans avoir à extraire du texte libre |
 
 **Hypothèse à valider par le test** : avec `temperature` à `0.3`, les plans générés devraient
 rester stables d'un appel à l'autre. En poussant à `0.9`, on attend des séances plus variées

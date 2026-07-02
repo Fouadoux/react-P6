@@ -64,7 +64,7 @@ Accept: application/json
 {
   "model": "mistral-small-latest",
   "temperature": 0.3,
-  "max_tokens": 2000,
+  "max_tokens": 4000,
   "response_format": { "type": "json_object" },
   "messages": [
     { "role": "system", "content": "<prompt système, cf. étape 3>" },
