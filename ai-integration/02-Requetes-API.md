@@ -21,19 +21,41 @@ Ces champs existent déjà dans les modèles Sportsee (`src/models/UserProfile.j
 ### 1.b Nouvelles données à collecter (n'existent pas encore dans l'app)
 
 La fonctionnalité "plan sur 6 semaines" a besoin d'informations que Sportsee ne demande pas
-aujourd'hui (aucun formulaire d'objectif de course, aucune notion de disponibilité/agenda dans
-le modèle actuel). **Il faudra créer un nouveau formulaire** pour les collecter :
+aujourd'hui (aucun formulaire d'objectif, aucune notion de disponibilité/agenda dans le modèle
+actuel). **Il faudra créer un nouveau formulaire** pour les collecter.
+
+**Choix de conception : un `type_objectif` plutôt qu'un objectif unique**
+
+Un plan "10 km en moins d'1h" et un plan "perte de poids" n'ont pas les mêmes besoins de
+données : le premier a une distance et un temps chronométré à respecter, le second n'en a pas
+et a besoin d'un poids actuel/visé à la place. Un schéma unique avec tous les champs
+optionnels aurait rendu le prompt ambigu (que fait l'IA d'un `tempsCible` vide sur un plan
+perte de poids ?). On structure donc les données en un **socle commun** + des **champs
+spécifiques selon le type d'objectif choisi**.
+
+**Socle commun (tous les objectifs)**
 
 | Champ à créer | Type | Exemple |
 |---|---|---|
-| `objectif` | select | `"semi-marathon"` |
-| `dateCourse` | date | `"2026-08-03"` |
-| `tempsCible` | text | `"1h50"` |
+| `type_objectif` | select : `"course"` \| `"perte_poids"` \| `"endurance"` \| `"forme_generale"` | `"course"` |
 | `joursDispo` | multi-select | `["lundi", "mercredi", "samedi"]` |
 | `momentPrefere` | select | `"matin"` |
 | `dureeSeance` | number (min) | `60` |
 | `contraintes` | text | `"genou sensible"` |
 | `conseilsNutrition` | bool | `true` |
+| `dateDebut` | date | `"2026-06-22"` |
+
+**Champs spécifiques selon `type_objectif`**
+
+| `type_objectif` | Champs supplémentaires | Exemple |
+|---|---|---|
+| `"course"` (semi-marathon, 10 km, marathon...) | `distance_course` (select), `temps_cible` (text), `dateCourse` (date) | `"10km"`, `"0h55"`, `"2026-08-03"` |
+| `"perte_poids"` | `poids_actuel` (number, kg), `poids_vise` (number, kg) | `78`, `73` |
+| `"endurance"` | `objectif_endurance` (text libre) | `"courir 45 min sans s'arrêter"` |
+| `"forme_generale"` | *(aucun champ supplémentaire)* | — |
+
+Concrètement, le formulaire affiche dynamiquement les champs spécifiques une fois que
+l'utilisateur a choisi son `type_objectif` — un pattern de formulaire conditionnel classique.
 
 > Point à trancher avec Charles : est-ce un nouveau formulaire dédié (ex. avant génération du
 > plan), ou des champs ajoutés au profil existant ? Ça a un impact sur l'estimation de temps
