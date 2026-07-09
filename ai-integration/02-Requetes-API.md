@@ -1,7 +1,7 @@
 # Étape 2 — Structure des requêtes API (Sportsee × Mistral)
 
 Documentation technique de la requête utilisée pour générer un plan d'entraînement
-personnalisé sur 6 semaines via l'API Mistral. Collection Postman associée :
+personnalisé, de durée variable (selon l'objectif et l'échéance), via l'API Mistral. Collection Postman associée :
 [`postman/Sportsee-Mistral.postman_collection.json`](./postman/Sportsee-Mistral.postman_collection.json).
 
 ## 1. Origine des données envoyées à l'API
@@ -20,7 +20,7 @@ Ces champs existent déjà dans les modèles Sportsee (`src/models/UserProfile.j
 
 ### 1.b Nouvelles données à collecter (n'existent pas encore dans l'app)
 
-La fonctionnalité "plan sur 6 semaines" a besoin d'informations que Sportsee ne demande pas
+La fonctionnalité de génération de plan a besoin d'informations que Sportsee ne demande pas
 aujourd'hui (aucun formulaire d'objectif, aucune notion de disponibilité/agenda dans le modèle
 actuel). **Il faudra créer un nouveau formulaire** pour les collecter.
 
@@ -28,10 +28,19 @@ actuel). **Il faudra créer un nouveau formulaire** pour les collecter.
 
 Un plan "10 km en moins d'1h" et un plan "perte de poids" n'ont pas les mêmes besoins de
 données : le premier a une distance et un temps chronométré à respecter, le second n'en a pas
-et a besoin d'un poids actuel/visé à la place. Un schéma unique avec tous les champs
-optionnels aurait rendu le prompt ambigu (que fait l'IA d'un `tempsCible` vide sur un plan
-perte de poids ?). On structure donc les données en un **socle commun** + des **champs
-spécifiques selon le type d'objectif choisi**.
+et a besoin d'un poids actuel/visé à la place. On structure donc les données en un **socle
+commun** + des **champs spécifiques selon le type d'objectif choisi**. Ce `type_objectif` est
+aussi la clé qui détermine, côté code, **quel prompt spécialisé** sera utilisé pour la
+génération (voir [03-Conception-Prompts.md](./03-Conception-Prompts.md)).
+
+**Principe de saisie : des options préenregistrées, pas du texte libre.** Chaque champ qui sert
+au routing vers un prompt, à un calcul déterministe (dates, faisabilité) ou à une contrainte
+métier précise (distance, jours, durée) est saisi via une liste fermée (`select` /
+multi-select), pas dictée en texte libre par l'utilisateur. Ça garantit des entrées normalisées
+et non ambiguës, indispensable pour que le code puisse router de façon fiable et précalculer
+dates et volumes. Seul le champ `contraintes` (description d'une gêne ou d'une blessure) reste
+en texte libre : la diversité des contraintes physiques possibles ne se prête pas à une liste
+fermée.
 
 **Socle commun (tous les objectifs)**
 
@@ -40,8 +49,8 @@ spécifiques selon le type d'objectif choisi**.
 | `type_objectif` | select : `"course"` \| `"perte_poids"` \| `"endurance"` \| `"forme_generale"` | `"course"` |
 | `joursDispo` | multi-select | `["lundi", "mercredi", "samedi"]` |
 | `momentPrefere` | select | `"matin"` |
-| `dureeSeance` | number (min) | `60` |
-| `contraintes` | text | `"genou sensible"` |
+| `dureeSeance` | select (paliers, min) | `60` |
+| `contraintes` | text (libre, guidé — limite de caractères) | `"genou sensible"` |
 | `conseilsNutrition` | bool | `true` |
 | `dateDebut` | date | `"2026-06-22"` |
 
@@ -49,10 +58,10 @@ spécifiques selon le type d'objectif choisi**.
 
 | `type_objectif` | Champs supplémentaires | Exemple |
 |---|---|---|
-| `"course"` (semi-marathon, 10 km, marathon...) | `distance_course` (select), `temps_cible` (text), `dateCourse` (date) | `"10km"`, `"0h55"`, `"2026-08-03"` |
+| `"course"` (semi-marathon, 10 km, marathon...) | `distance_course` (select), `temps_cible` (select — paliers par distance), `dateCourse` (date) | `"10km"`, `"< 55 min"`, `"2026-08-03"` |
 | `"perte_poids"` | `poids_actuel` (number, kg), `poids_vise` (number, kg) | `78`, `73` |
-| `"endurance"` | `objectif_endurance` (text libre) | `"courir 45 min sans s'arrêter"` |
-| `"forme_generale"` | *(aucun champ supplémentaire)* | — |
+| `"endurance"` | `objectif_endurance` (select — paliers de durée sans s'arrêter) | `"45 min"` |
+| `"forme_generale"` | *(aucun champ supplémentaire)* — `dureePlan` (select, en semaines) | `8` |
 
 Concrètement, le formulaire affiche dynamiquement les champs spécifiques une fois que
 l'utilisateur a choisi son `type_objectif` — un pattern de formulaire conditionnel classique.
@@ -60,6 +69,23 @@ l'utilisateur a choisi son `type_objectif` — un pattern de formulaire conditio
 > Point à trancher avec Charles : est-ce un nouveau formulaire dédié (ex. avant génération du
 > plan), ou des champs ajoutés au profil existant ? Ça a un impact sur l'estimation de temps
 > (étape 4, §8).
+
+### 1.c Durée du plan et faisabilité
+
+La durée du plan (`duree_semaines`) n'est **jamais saisie librement** ni laissée au modèle : elle
+est déterminée côté code, selon deux cas.
+
+- **Objectif `course`** : `duree_semaines` découle du délai réel jusqu'à `dateCourse`. Un
+  **algorithme de faisabilité déterministe** (`faisabilite.py`, voir
+  [04-Synthese.md](./04-Synthese.md) §3.1) doit obligatoirement être exécuté en amont de toute
+  génération : il vérifie que l'objectif (distance + délai) est atteignable en respectant une
+  progression de volume sûre, et sinon calcule une alternative (distance revue à la baisse et/ou
+  délai minimal requis). C'est cet algorithme qui fournit la `distance_cible_km` et la
+  `duree_semaines` finalement injectées dans le prompt Course — jamais les valeurs brutes saisies
+  par l'utilisateur sans passage par ce contrôle.
+- **Autres objectifs** (`perte_poids`, `endurance`, `forme_generale`) : pas de date fixe à tenir,
+  donc pas de calcul de faisabilité nécessaire. `duree_semaines` est un champ `select` choisi
+  directement par l'utilisateur (ex. 4, 6, 8 ou 12 semaines).
 
 ## 2. Endpoint
 
@@ -85,15 +111,25 @@ Accept: application/json
 ```json
 {
   "model": "mistral-small-latest",
-  "temperature": 0.3,
-  "max_tokens": 4000,
+  "temperature": 0.2,
+  "max_tokens": 8000,
   "response_format": { "type": "json_object" },
   "messages": [
-    { "role": "system", "content": "<prompt système, cf. étape 3>" },
-    { "role": "user", "content": "<profil coureur + historique + schéma JSON attendu, cf. étape 3>" }
+    { "role": "system", "content": "<prompt système spécialisé selon type_objectif, cf. étape 3>" },
+    { "role": "user", "content": "<profil coureur + historique + dates précalculées + schéma JSON attendu, cf. étape 3>" }
   ]
 }
 ```
+
+Le prompt `system` n'est **pas un template unique avec des branches conditionnelles** : le code
+sélectionne, avant l'appel, le prompt spécialisé correspondant au `type_objectif` (et, pour
+`"course"`, aux valeurs validées par l'algorithme de faisabilité). Le modèle ne reçoit que les
+règles pertinentes pour la demande en cours.
+
+`max_tokens` est dimensionné selon le nombre de séances attendu dans le plan
+(`duree_semaines × séances/semaine`), à raison d'environ 120 à 180 tokens par séance —
+`8000` est une base sûre pour les plans les plus denses testés, en attendant un calcul
+dynamique côté code.
 
 ## 5. Réponse attendue (succès)
 
@@ -107,18 +143,19 @@ Accept: application/json
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "{\"objectif\":\"semi-marathon\",\"duree_semaines\":6,\"semaines\":[...]}"
+        "content": "{\"objectif\":\"semi-marathon\",\"duree_semaines\":12,\"semaines\":[...]}"
       },
       "finish_reason": "stop"
     }
   ],
-  "usage": { "prompt_tokens": 480, "completion_tokens": 1120, "total_tokens": 1600 }
+  "usage": { "prompt_tokens": 950, "completion_tokens": 3800, "total_tokens": 4750 }
 }
 ```
 
 Le plan généré se trouve dans `choices[0].message.content`, sous forme de **chaîne JSON**
 (pas un objet JSON imbriqué) : il faut donc faire un `JSON.parse()` côté application avant de
-l'utiliser.
+l'utiliser. Le volume de tokens réel dépend fortement de la durée du plan et du nombre de
+séances par semaine (voir [04-Synthese.md](./04-Synthese.md) §3 pour des exemples mesurés).
 
 ## 6. Gestion des erreurs
 
@@ -129,6 +166,7 @@ l'utiliser.
 | `429` | Trop de requêtes (rate limit dépassé) | Retenter avec un backoff, ou mettre l'utilisateur en file d'attente (voir § rate limiting) |
 | `500` / `503` | Erreur ou indisponibilité côté Mistral | Retry avec backoff exponentiel (2-3 tentatives max), puis message d'erreur clair à l'utilisateur |
 | Réponse `200` mais JSON invalide/hors schéma | Le modèle n'a pas respecté le format demandé | Valider le JSON reçu contre le schéma attendu avant de l'afficher ; si invalide, retenter une fois avec un rappel du format dans le prompt |
+| Réponse `200`, JSON valide et conforme au schéma, mais incohérent sur le fond (ex. progression de volume hors règle, champ vide alors que la donnée liée est renseignée) | Une validation de schéma seule ne suffit pas | Ajouter une validation **sémantique** dédiée (règles métier) en plus de la validation de structure, avant tout affichage — voir [04-Synthese.md](./04-Synthese.md) §4 |
 
 Dans tous les cas, le comportement doit être **explicite** côté React (état `loading` / `error`
 / `success`), sur le même principe que les hooks existants (`useUserActivity`,
@@ -150,6 +188,6 @@ budget :
 
 ## 8. Vérification avant documentation finale
 
-Avant d'intégrer les captures d'écran au document de synthèse (étape 4), chaque requête de la
-collection Postman doit être exécutée avec une vraie clé API et donner un statut `200` avec une
-réponse conforme au schéma attendu.
+Chaque requête de la collection Postman (une par prompt spécialisé) a été exécutée avec une
+vraie clé API ; les résultats détaillés (statuts, conformité des réponses) sont documentés dans
+[04-Synthese.md](./04-Synthese.md).
