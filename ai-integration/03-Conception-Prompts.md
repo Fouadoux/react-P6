@@ -18,8 +18,12 @@ couvrant les quatre cas l'oblige à trier lui-même les règles pertinentes selo
 l'appel API, chaque appel envoie au modèle exactement les règles qui s'appliquent à la demande en
 cours, ni plus ni moins. Le code sélectionne le prompt spécialisé correspondant au
 `type_objectif` (voir [02-Requetes-API.md](./02-Requetes-API.md) §1.c), et, pour `"course"`,
-n'active ce prompt qu'après validation par l'algorithme de faisabilité (voir
-[04-Synthese.md](./04-Synthese.md) §3.1).
+n'active ce prompt qu'après validation par l'**agent de vérification de faisabilité** (un LLM avec
+exécution de code réelle via `code_interpreter`, pas un algorithme métier côté application — voir
+[04-Synthese.md](./04-Synthese.md) §3.1). Ces agents de vérification sont conçus séparément des
+quatre prompts de génération décrits dans ce document ; leur méthodologie propre (calcul par code
+exécuté plutôt que "pensé", ordre des champs de sortie, garde-fous anti-boucle-infinie) est
+détaillée en §10.
 
 Règle d'or, valable pour tous les prompts : **plus le prompt est précis et contraint, plus la
 réponse est pertinente et exploitable.**
@@ -98,8 +102,9 @@ inversement.
 CONTEXTE DE CETTE DEMANDE : préparation à une course sur route.
 - Objectif : {{distance_cible_km}} km, temps cible {{temps_cible}}.
 - Cet objectif a déjà été validé comme réalisable dans le délai de {{duree_semaines}} semaines par
-  un contrôle de faisabilité effectué en amont (côté application). NE remets PAS en cause
-  distance_cible_km ni duree_semaines : ces valeurs sont déjà cohérentes entre elles.
+  l'agent de vérification de faisabilité, exécuté en amont (voir
+  [02-Requetes-API.md](./02-Requetes-API.md) §1.c). NE remets PAS en cause distance_cible_km ni
+  duree_semaines : ces valeurs sont déjà cohérentes entre elles.
 
 RÈGLES SPÉCIFIQUES :
 - Inclus au moins une séance "sortie longue" chaque semaine, en progression cohérente vers la
@@ -434,3 +439,65 @@ chronométré — le parsing React n'a pas besoin de changer.
 - **Formulations alternatives à tester** : comparer différentes formulations du rôle (ex. ton
   neutre vs. ton "bienveillant") sur la qualité des conseils nutrition générés, pour affiner le
   ton perçu par un public de loisirs.
+
+## 10. Conception des prompts de vérification de faisabilité (agents `code_interpreter`)
+
+Les 4 agents de vérification (un par `type_objectif`, voir
+[02-Requetes-API.md](./02-Requetes-API.md) §1.c) suivent des principes de conception différents
+des prompts de génération ci-dessus, tirés directement des tests documentés en
+[04-Synthese.md](./04-Synthese.md) Annexe B.
+
+**1. Calcul exécuté, jamais "pensé".** La règle absolue de chaque agent : tout calcul numérique
+(cohérence des données, classification de niveau, progression de volume, comparaison finale) doit
+être écrit et exécuté en Python via `code_interpreter`, jamais énoncé en langage naturel dans le
+corps de la réponse. C'est ce changement, à lui seul, qui a éliminé la quasi-totalité des erreurs
+de calcul observées sur l'approche précédente (formule logarithmique erronée, double division,
+comparaisons ratées).
+
+**2. Progression itérative plutôt que formule fermée.** Le calcul du nombre de semaines
+nécessaires pour atteindre un volume cible avec une progression de +10 %/semaine s'exprime
+mathématiquement par un logarithme (`ln(cible/depart)/ln(1.10)`). Cette formule s'est révélée être
+une source d'erreurs de calcul bien plus fréquente qu'une simple boucle de multiplication
+(`while valeur < cible: valeur *= 1.10`). Tous les agents utilisent la version itérative,
+accompagnée d'un pseudo-code non ambigu pour éviter une erreur de comptage "décalée d'un cran"
+(piège classique : incrémenter le compteur avant vs. après la multiplication).
+
+**3. Garde-fou anti-boucle-infinie explicite.** Si le volume de départ est nul ou négatif, la
+boucle de progression ci-dessus ne se termine jamais (`0 × 1.10 = 0` indéfiniment). Chaque agent
+reçoit une instruction explicite interdisant d'entrer dans cette boucle si le volume de départ
+n'est pas strictement positif — un cas qui, en pratique, est de toute façon intercepté avant
+l'appel à l'agent par le garde-fou applicatif décrit en
+[02-Requetes-API.md](./02-Requetes-API.md) §1.c.
+
+**4. Ordre des champs de sortie : la décision en dernier.** Le schéma JSON demandé place
+systématiquement `faisable` en tout dernier champ, après `detail_calcul`. Un LLM génère sa réponse
+JSON dans l'ordre des champs déclarés : si `faisable` est demandé en premier, le modèle doit
+committer à `true`/`false` avant même d'avoir écrit le calcul censé le justifier — avec le risque
+que la conclusion écrite ensuite diverge de ce booléen déjà figé. Placer `faisable` en dernier
+oblige le modèle à recopier une conclusion déjà posée par écrit dans `detail_calcul`, plutôt que
+de la deviner en tête de réponse.
+
+**5. Séparation recommandation coach / calcul de faisabilité (agent Course uniquement).** Pour la
+course à pied, deux logiques différentes coexistent : une tolérance de progression de volume
+(calculable) et une recommandation de coach indépendante du volume de départ (temps d'adaptation
+tendineuse/articulaire, apprentissage de l'allure — non calculable, issue de pratiques coach). Le
+schéma de sortie sépare ces deux informations (`semaines_minimum_recommandees` vs.
+`semaines_recommandees_coach`) plutôt que de les fusionner via un `max()`, pour que `faisable`
+reste strictement basé sur un calcul et que la recommandation coach reste visible sans bloquer.
+
+**6. Validation explicite du périmètre d'entrée.** Pour l'agent Course, seules 3 distances sont
+reconnues (10 km, semi-marathon, marathon). Une distance hors de ce périmètre (ex. un ultra-trail)
+doit être explicitement rejetée par l'agent (`faisable = false`, message dédié), plutôt que de
+laisser le modèle improviser une catégorie et des seuils non validés par un coach — un
+comportement observé en test avant l'ajout de ce garde-fou.
+
+**7. Nettoyage défensif systématique côté application.** Malgré une instruction explicite, la
+réponse finale de l'agent est parfois enveloppée de balises Markdown (` ```json `) de façon
+intermittente. Ce n'est pas un problème d'instruction (le texte est bien présent dans les
+consignes) mais une variabilité résiduelle du modèle : la robustesse doit venir du parsing côté
+application (retrait défensif des balises avant `JSON.parse`), pas d'une itération supplémentaire
+sur le prompt.
+
+Le détail complet des tests ayant mené à chacun de ces principes — y compris les échecs
+intermédiaires (bugs de calcul, boucle infinie provoquée, réponses vides sur entrées dégénérées)
+— est documenté en [04-Synthese.md](./04-Synthese.md) Annexe B.
