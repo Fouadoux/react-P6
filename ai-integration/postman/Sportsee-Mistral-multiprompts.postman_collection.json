@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "Sportsee - Mistral (Multi-prompts par type de demande)",
+    "description": "Architecture multi-prompts : 1 prompt specialise par type d'objectif. La FAISABILITE (faisable/duree/volume cible/distance_cible_km) est calculee par un ALGO BACKEND deterministe (hors LLM). Le CODE calcule aussi duree_semaines, dates_autorisees et la rampe de volume, puis remplit les variables. Base : temperature 0.2. Plans : max_tokens 8000 (evite la troncature). Affutage UNIQUEMENT sur le prompt Course. Chaque prompt doit etre co-redige/valide avec un coach sportif.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{MISTRAL_API_KEY}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.mistral.ai"
+    },
+    {
+      "key": "model",
+      "value": "mistral-small-latest"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Plan COURSE (10 km / semi / marathon)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/chat/completions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "chat",
+            "completions"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\n  \"model\": \"{{model}}\",\n  \"temperature\": 0.2,\n  \"max_tokens\": 8000,\n  \"response_format\": {\n    \"type\": \"json_object\"\n  },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un coach de course a pied experimente. Genere un plan de preparation a une course de {{distance_cible}} (10 km, semi-marathon ou marathon). Periodisation : endurance fondamentale, seances de seuil / allure specifique, et fractionne adapte a la blessure. L'objectif a deja ete valide comme faisable (requete 0) par le routing cote code.\\n\\n=== REGLES IMPERATIVES (communes) ===\\n- Le plan couvre EXACTEMENT {{duree_semaines}} semaines (duree fournie, NE PAS recalculer).\\n- Semaine 1 = volume de reference fourni ({{volume_reference_km}} km), SANS augmentation.\\n- Progression du volume STRICTEMENT <= 10% vs semaine precedente : volume_max = volume_semaine_precedente * 1.10, puis volume_hebdo_km <= volume_max.\\n- Utilise UNIQUEMENT les dates de {{dates_autorisees}}. Ne calcule aucune date. Aucune seance hors de cette liste.\\n- Blessure ({{blessure}}) PRIORITAIRE sur TOUTES les semaines, y compris la derniere : adapte chaque seance concernee (reduire l'impact, eviter le fractionne dur, surfaces souples, allure controlee) et documente dans adaptation_blessure (sinon RAS).\\n- Au moins une seance longue par semaine.\\n- La DERNIERE semaine = allegement (affutage) avant la course : volume reduit, pas de charge maximale.\\n=== VERIFICATION (obligatoire) ===\\nPour chaque semaine N>=2 : (volume_hebdo_km[N]/volume_hebdo_km[N-1]) - 1 <= 0.10. Corrige si depasse.\\n=== FORMAT ===\\nReponds UNIQUEMENT avec un objet JSON valide, sans texte ni Markdown autour, conforme au schema fourni.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Profil : {{age}} ans, {{genre}}, {{poids_kg}} kg / {{taille_cm}} cm. Volume de reference : {{volume_reference_km}} km/semaine.\\\\nParametres (DONNEES PRE-CALCULEES COTE CODE, NE PAS RECALCULER) :\\\\n- duree_semaines : {{duree_semaines}}\\\\n- jours_disponibles : {{jours_disponibles}} | moment_prefere : {{moment_prefere}} | duree_par_seance_min : {{duree_par_seance_min}}\\\\n- blessure : {{blessure}}\\\\n- distance_cible : {{distance_cible}}\\\\n- dates_autorisees :\\\\n{{dates_autorisees}}\\\\n\\\\nGenere le plan au format JSON STRICT suivant :\\\\n{\\n  \\\\\\\"objectif\\\\\\\": string,\\n  \\\\\\\"duree_semaines\\\\\\\": number,\\n  \\\\\\\"avertissement\\\\\\\": string,\\n  \\\\\\\"semaines\\\\\\\": [\\n    {\\n      \\\\\\\"numero\\\\\\\": number,\\n      \\\\\\\"objectif_semaine\\\\\\\": string,\\n      \\\\\\\"volume_hebdo_km\\\\\\\": number,\\n      \\\\\\\"sessions\\\\\\\": [\\n        { \\\\\\\"date\\\\\\\": \\\\\\\"YYYY-MM-DD\\\\\\\", \\\\\\\"jour\\\\\\\": string, \\\\\\\"type\\\\\\\": string, \\\\\\\"duree_min\\\\\\\": number, \\\\\\\"distance_km\\\\\\\": number, \\\\\\\"vitesse_cible\\\\\\\": string, \\\\\\\"adaptation_blessure\\\\\\\": string, \\\\\\\"conseil_alimentation\\\\\\\": string }\\n      ]\\n    }\\n  ]\\n}\"\n    }\n  ]\n}"
+        },
+        "description": "type_objectif = course. Distance et duree faisable arbitrees par l'ALGO de faisabilite backend (deterministe). AVEC affutage final. Prompt co-redige/valide avec un coach sportif."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Plan PERTE DE POIDS",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/chat/completions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "chat",
+            "completions"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\n  \"model\": \"{{model}}\",\n  \"temperature\": 0.2,\n  \"max_tokens\": 8000,\n  \"response_format\": {\n    \"type\": \"json_object\"\n  },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un coach sportif specialise en reprise d'activite et gestion du poids. Genere un plan oriente depense energetique et regularite : endurance a intensite moderee, SANS logique de chrono ni de course. vitesse_cible = allure de confort (pas une performance).\\n\\n=== REGLES IMPERATIVES (communes) ===\\n- Le plan couvre EXACTEMENT {{duree_semaines}} semaines (duree fournie, NE PAS recalculer).\\n- Semaine 1 = volume de reference fourni ({{volume_reference_km}} km), SANS augmentation.\\n- Progression du volume STRICTEMENT <= 10% vs semaine precedente : volume_max = volume_semaine_precedente * 1.10, puis volume_hebdo_km <= volume_max.\\n- Utilise UNIQUEMENT les dates de {{dates_autorisees}}. Ne calcule aucune date. Aucune seance hors de cette liste.\\n- Blessure ({{blessure}}) PRIORITAIRE sur TOUTES les semaines, y compris la derniere : adapte chaque seance concernee (reduire l'impact, eviter le fractionne dur, surfaces souples, allure controlee) et documente dans adaptation_blessure (sinon RAS).\\n- Au moins une seance longue par semaine.\\n- PAS de semaine d'affutage / taper : il n'y a AUCUNE course a preparer. Maintiens la regularite jusqu'au bout, sans employer le mot affutage.\\n=== VERIFICATION (obligatoire) ===\\nPour chaque semaine N>=2 : (volume_hebdo_km[N]/volume_hebdo_km[N-1]) - 1 <= 0.10. Corrige si depasse.\\n=== FORMAT ===\\nReponds UNIQUEMENT avec un objet JSON valide, sans texte ni Markdown autour, conforme au schema fourni.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Profil : {{age}} ans, {{genre}}, {{poids_kg}} kg / {{taille_cm}} cm. Volume de reference : {{volume_reference_km}} km/semaine.\\\\nParametres (DONNEES PRE-CALCULEES COTE CODE, NE PAS RECALCULER) :\\\\n- duree_semaines : {{duree_semaines}}\\\\n- jours_disponibles : {{jours_disponibles}} | moment_prefere : {{moment_prefere}} | duree_par_seance_min : {{duree_par_seance_min}}\\\\n- blessure : {{blessure}}\\\\n- dates_autorisees :\\\\n{{dates_autorisees}}\\\\n\\\\nGenere le plan au format JSON STRICT suivant :\\\\n{\\n  \\\\\\\"objectif\\\\\\\": string,\\n  \\\\\\\"duree_semaines\\\\\\\": number,\\n  \\\\\\\"avertissement\\\\\\\": string,\\n  \\\\\\\"semaines\\\\\\\": [\\n    {\\n      \\\\\\\"numero\\\\\\\": number,\\n      \\\\\\\"objectif_semaine\\\\\\\": string,\\n      \\\\\\\"volume_hebdo_km\\\\\\\": number,\\n      \\\\\\\"sessions\\\\\\\": [\\n        { \\\\\\\"date\\\\\\\": \\\\\\\"YYYY-MM-DD\\\\\\\", \\\\\\\"jour\\\\\\\": string, \\\\\\\"type\\\\\\\": string, \\\\\\\"duree_min\\\\\\\": number, \\\\\\\"distance_km\\\\\\\": number, \\\\\\\"vitesse_cible\\\\\\\": string, \\\\\\\"adaptation_blessure\\\\\\\": string, \\\\\\\"conseil_alimentation\\\\\\\": string }\\n      ]\\n    }\\n  ]\\n}\"\n    }\n  ]\n}"
+        },
+        "description": "type_objectif = perte_poids. SANS affutage (pas de course). Prompt co-redige/valide avec un coach sportif."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Plan ENDURANCE",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/chat/completions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "chat",
+            "completions"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\n  \"model\": \"{{model}}\",\n  \"temperature\": 0.2,\n  \"max_tokens\": 8000,\n  \"response_format\": {\n    \"type\": \"json_object\"\n  },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un coach d'endurance. Genere un plan visant a augmenter progressivement la capacite aerobie et le volume soutenable, mesurable semaine apres semaine, SANS objectif de competition.\\n\\n=== REGLES IMPERATIVES (communes) ===\\n- Le plan couvre EXACTEMENT {{duree_semaines}} semaines (duree fournie, NE PAS recalculer).\\n- Semaine 1 = volume de reference fourni ({{volume_reference_km}} km), SANS augmentation.\\n- Progression du volume STRICTEMENT <= 10% vs semaine precedente : volume_max = volume_semaine_precedente * 1.10, puis volume_hebdo_km <= volume_max.\\n- Utilise UNIQUEMENT les dates de {{dates_autorisees}}. Ne calcule aucune date. Aucune seance hors de cette liste.\\n- Blessure ({{blessure}}) PRIORITAIRE sur TOUTES les semaines, y compris la derniere : adapte chaque seance concernee (reduire l'impact, eviter le fractionne dur, surfaces souples, allure controlee) et documente dans adaptation_blessure (sinon RAS).\\n- Au moins une seance longue par semaine.\\n- PAS de semaine d'affutage / taper : il n'y a AUCUNE course a preparer. Maintiens la regularite jusqu'au bout, sans employer le mot affutage.\\n=== VERIFICATION (obligatoire) ===\\nPour chaque semaine N>=2 : (volume_hebdo_km[N]/volume_hebdo_km[N-1]) - 1 <= 0.10. Corrige si depasse.\\n=== FORMAT ===\\nReponds UNIQUEMENT avec un objet JSON valide, sans texte ni Markdown autour, conforme au schema fourni.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Profil : {{age}} ans, {{genre}}, {{poids_kg}} kg / {{taille_cm}} cm. Volume de reference : {{volume_reference_km}} km/semaine.\\\\nParametres (DONNEES PRE-CALCULEES COTE CODE, NE PAS RECALCULER) :\\\\n- duree_semaines : {{duree_semaines}}\\\\n- jours_disponibles : {{jours_disponibles}} | moment_prefere : {{moment_prefere}} | duree_par_seance_min : {{duree_par_seance_min}}\\\\n- blessure : {{blessure}}\\\\n- dates_autorisees :\\\\n{{dates_autorisees}}\\\\n\\\\nGenere le plan au format JSON STRICT suivant :\\\\n{\\n  \\\\\\\"objectif\\\\\\\": string,\\n  \\\\\\\"duree_semaines\\\\\\\": number,\\n  \\\\\\\"avertissement\\\\\\\": string,\\n  \\\\\\\"semaines\\\\\\\": [\\n    {\\n      \\\\\\\"numero\\\\\\\": number,\\n      \\\\\\\"objectif_semaine\\\\\\\": string,\\n      \\\\\\\"volume_hebdo_km\\\\\\\": number,\\n      \\\\\\\"sessions\\\\\\\": [\\n        { \\\\\\\"date\\\\\\\": \\\\\\\"YYYY-MM-DD\\\\\\\", \\\\\\\"jour\\\\\\\": string, \\\\\\\"type\\\\\\\": string, \\\\\\\"duree_min\\\\\\\": number, \\\\\\\"distance_km\\\\\\\": number, \\\\\\\"vitesse_cible\\\\\\\": string, \\\\\\\"adaptation_blessure\\\\\\\": string, \\\\\\\"conseil_alimentation\\\\\\\": string }\\n      ]\\n    }\\n  ]\\n}\"\n    }\n  ]\n}"
+        },
+        "description": "type_objectif = endurance. SANS affutage. Prompt co-redige/valide avec un coach sportif."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Plan FORME GENERALE",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/chat/completions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "chat",
+            "completions"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\n  \"model\": \"{{model}}\",\n  \"temperature\": 0.2,\n  \"max_tokens\": 8000,\n  \"response_format\": {\n    \"type\": \"json_object\"\n  },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un coach de remise en forme. Genere un plan d'entretien equilibre a intensite moderee, SANS surcharge ni objectif de distance, centre sur la regularite et le plaisir.\\n\\n=== REGLES IMPERATIVES (communes) ===\\n- Le plan couvre EXACTEMENT {{duree_semaines}} semaines (duree fournie, NE PAS recalculer).\\n- Semaine 1 = volume de reference fourni ({{volume_reference_km}} km), SANS augmentation.\\n- Progression du volume STRICTEMENT <= 10% vs semaine precedente : volume_max = volume_semaine_precedente * 1.10, puis volume_hebdo_km <= volume_max.\\n- Utilise UNIQUEMENT les dates de {{dates_autorisees}}. Ne calcule aucune date. Aucune seance hors de cette liste.\\n- Blessure ({{blessure}}) PRIORITAIRE sur TOUTES les semaines, y compris la derniere : adapte chaque seance concernee (reduire l'impact, eviter le fractionne dur, surfaces souples, allure controlee) et documente dans adaptation_blessure (sinon RAS).\\n- Au moins une seance longue par semaine.\\n- PAS de semaine d'affutage / taper : il n'y a AUCUNE course a preparer. Maintiens la regularite jusqu'au bout, sans employer le mot affutage.\\n=== VERIFICATION (obligatoire) ===\\nPour chaque semaine N>=2 : (volume_hebdo_km[N]/volume_hebdo_km[N-1]) - 1 <= 0.10. Corrige si depasse.\\n=== FORMAT ===\\nReponds UNIQUEMENT avec un objet JSON valide, sans texte ni Markdown autour, conforme au schema fourni.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Profil : {{age}} ans, {{genre}}, {{poids_kg}} kg / {{taille_cm}} cm. Volume de reference : {{volume_reference_km}} km/semaine.\\\\nParametres (DONNEES PRE-CALCULEES COTE CODE, NE PAS RECALCULER) :\\\\n- duree_semaines : {{duree_semaines}}\\\\n- jours_disponibles : {{jours_disponibles}} | moment_prefere : {{moment_prefere}} | duree_par_seance_min : {{duree_par_seance_min}}\\\\n- blessure : {{blessure}}\\\\n- dates_autorisees :\\\\n{{dates_autorisees}}\\\\n\\\\nGenere le plan au format JSON STRICT suivant :\\\\n{\\n  \\\\\\\"objectif\\\\\\\": string,\\n  \\\\\\\"duree_semaines\\\\\\\": number,\\n  \\\\\\\"avertissement\\\\\\\": string,\\n  \\\\\\\"semaines\\\\\\\": [\\n    {\\n      \\\\\\\"numero\\\\\\\": number,\\n      \\\\\\\"objectif_semaine\\\\\\\": string,\\n      \\\\\\\"volume_hebdo_km\\\\\\\": number,\\n      \\\\\\\"sessions\\\\\\\": [\\n        { \\\\\\\"date\\\\\\\": \\\\\\\"YYYY-MM-DD\\\\\\\", \\\\\\\"jour\\\\\\\": string, \\\\\\\"type\\\\\\\": string, \\\\\\\"duree_min\\\\\\\": number, \\\\\\\"distance_km\\\\\\\": number, \\\\\\\"vitesse_cible\\\\\\\": string, \\\\\\\"adaptation_blessure\\\\\\\": string, \\\\\\\"conseil_alimentation\\\\\\\": string }\\n      ]\\n    }\\n  ]\\n}\"\n    }\n  ]\n}"
+        },
+        "description": "type_objectif = forme_generale. SANS affutage. Prompt co-redige/valide avec un coach sportif."
+      },
+      "response": []
+    }
+  ]
+}
